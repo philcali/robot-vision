@@ -1,22 +1,26 @@
 package capture
 
+// Scala Imports
+import util.control.Exception.allCatch
+
 import unfiltered.request._
 import unfiltered.response._
-
 import unfiltered.jetty.Http
 
+// Java Imports
 import java.awt.{
   Toolkit,
   Rectangle,
   Robot
 }
 import java.awt.image.RenderedImage
-
-import javax.imageio.ImageIO
-
+import javax.imageio.{
+  ImageIO,
+  ImageWriteParam,
+  IIOImage
+}
+import javax.imageio.stream.MemoryCacheImageOutputStream
 import java.io.ByteArrayOutputStream
-
-import util.control.Exception.allCatch
 
 object Screenshot {
   def take = {
@@ -30,8 +34,17 @@ object Screenshot {
 object DesktopImage extends unfiltered.filter.Plan {
   def stream(img: RenderedImage) = {
     val buffer = new ByteArrayOutputStream()
+    val cache = new MemoryCacheImageOutputStream(buffer)
 
-    ImageIO.write(img, "jpg", buffer)
+    val writer = ImageIO.getImageWritersByFormatName("jpeg").next
+    val param = writer.getDefaultWriteParam()
+
+    param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT)
+    param.setCompressionQuality(0.3f)
+
+    writer.setOutput(cache)
+    writer.write(null, new IIOImage(img, null, null), param)
+    writer.dispose()
 
     Status(200) ~>
     ContentType("image/jpg") ~>
