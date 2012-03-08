@@ -15,6 +15,9 @@ window.onload = function() {
   var canvas = document.getElementById("desktop");
   var context = canvas.getContext("2d");
 
+  // Buffer to be draw on animation
+  var buffer = new Image();
+
   var mousepos = {};
 
   var host = "ws://" + window.location.host;
@@ -59,20 +62,28 @@ window.onload = function() {
     context.stroke();
   };
 
-  socket.onmessage = function(e) {
-    var image = new Image();
-    image.onload = function() {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(image, 0, 0);
-      drawPointer(mousepos);
-    };
-    image.src = "/image/desktop.jpg"
-  };
+  // Redrawing the canvas should be fluid
+  function redraw() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(buffer, 0, 0);
+    drawPointer(mousepos);
 
-  function fireNotification() {
-    socket.send("render");
-    requestAnimFrame(fireNotification);
+    requestAnimFrame(redraw);
   }
 
-  setTimeout(fireNotification, 1000);
+  // Redrawing the desktop image can be much slower
+  function reDesktop() {
+    var image = new Image();
+
+    image.onload = function() {
+      buffer = image;
+    };
+
+    image.src = "/image/desktop.jpg";
+
+    setTimeout(reDesktop, 150);
+  }
+
+  setTimeout(redraw, 1000);
+  setTimeout(reDesktop, 1000);
 };

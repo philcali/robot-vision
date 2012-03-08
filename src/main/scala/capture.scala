@@ -138,8 +138,6 @@ trait KeyTranslator {
   }
 }
 
-object DesktopRender extends EventParsing("render")
-
 object MouseDown extends EventParsing("mousedown") with MouseTranslator
 object MouseUp extends EventParsing("mouseup") with MouseTranslator
 object MouseMove extends EventParsing("mousemove")
@@ -186,7 +184,6 @@ object Main extends App {
   Http(8080).handler(Planify({
     case _ => {
       case Message(s, Text(msg)) => msg match {
-        case "render" => s.send("reload")
         case KeyUp(keycode) =>
           Remote(_.keyRelease(KeyUp.translate(keycode)))
         case KeyDown(keycode) =>
