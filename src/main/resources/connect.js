@@ -24,9 +24,20 @@ window.onload = function() {
 
   var socket = new WebSocket(host);
 
+  // http://www.html5canvastutorials.com/advanced/html5-canvas-mouse-coordinates/
   canvas.onmousemove = function(evt) {
-    var x = evt.clientX - 9;
-    var y = evt.clientY - 8;
+    var obj = canvas;
+    var top = 0;
+    var left = 0;
+    while (obj && obj.tagName != 'BODY') {
+        top += obj.offsetTop;
+        left += obj.offsetLeft;
+        obj = obj.offsetParent;
+    }
+ 
+    // return relative mouse position
+    var x = evt.clientX - left + window.pageXOffset;
+    var y = evt.clientY - top + window.pageYOffset;
     
     mousepos = { x: x, y: y };
     socket.send("mousemove|" + x + "|" + y);
@@ -81,7 +92,7 @@ window.onload = function() {
 
     image.src = "/image/desktop.jpg";
 
-    setTimeout(reDesktop, 150);
+    setTimeout(reDesktop, 200);
   }
 
   setTimeout(redraw, 1000);

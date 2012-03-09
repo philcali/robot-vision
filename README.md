@@ -8,8 +8,11 @@ for free for Chrome users (Chromebook in particular).
 
 ## TODO's
 
-- Finish mapping JavaScript keyCode
-- Scaling
+- ~Finish mapping JavaScript keyCode~
+- ~Scaling~
+- Popout interface for dynamic controls
+- localStorage for some settings
+- Basic auth for viewing and controls
 - Add graceful failures across the board
 - Make conscripted launch for server
 - Make client portion a Chrome Extension
