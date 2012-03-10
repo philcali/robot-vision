@@ -6,14 +6,11 @@ import java.awt.event.{
   KeyEvent
 }
 
-class EventParsing(val ident: String) {
-  def unapplySeq(text: String) = {
-    if (!text.startsWith(ident)) None else
-      Some(text.split("\\|").drop(1).toSeq)
-  }
-}
+import util.control.Exception.allCatch
 
 object MouseTranslate {
+  def unapply(button: String) = allCatch opt(apply(button))
+
   def apply(button: String) = button match {
     case "0" => InputEvent.BUTTON1_MASK
     case "2" => InputEvent.BUTTON3_MASK
@@ -22,6 +19,8 @@ object MouseTranslate {
 }
 
 object KeyTranslate {
+  def unapply(key: String) = allCatch opt(apply(key))
+
   def apply(key: String) = key match {
     case "65" => KeyEvent.VK_A
     case "66" => KeyEvent.VK_B
@@ -84,11 +83,3 @@ object KeyTranslate {
     case _ => KeyEvent.CHAR_UNDEFINED
   }
 }
-
-object MouseDown extends EventParsing("mousedown")
-object MouseUp extends EventParsing("mouseup")
-object MouseMove extends EventParsing("mousemove")
-
-object KeyUp extends EventParsing("keyup")
-object KeyDown extends EventParsing("keydown")
-
