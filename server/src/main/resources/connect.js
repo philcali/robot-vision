@@ -20,7 +20,8 @@ window.onload = function() {
 
   var mousepos = {};
 
-  var host = "ws://" + window.location.host;
+  var protocol = window.location.protocol == 'https:' ? 'wss://' : 'ws://';
+  var host = protocol + window.location.host;
 
   var socket = new WebSocket(host);
 
@@ -88,11 +89,12 @@ window.onload = function() {
 
     image.onload = function() {
       buffer = image;
+
+      // Redraw desktop only after the last draw
+      setTimeout(reDesktop, 200);
     };
 
     image.src = "/image/desktop.jpg";
-
-    setTimeout(reDesktop, 200);
   }
 
   setTimeout(redraw, 1000);

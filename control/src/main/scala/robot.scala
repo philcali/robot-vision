@@ -38,15 +38,19 @@ object Robot {
 }
 
 case class Screenshot(image: BufferedImage) {
-  def prep = {
-    new BufferedImage(image.getWidth, image.getHeight, image.getType)
+  def prep(x: Double, y: Double) = {
+    new BufferedImage(
+      (image.getWidth.toDouble * x).toInt,
+      (image.getHeight.toDouble * y).toInt,
+      image.getType
+    )
   }
 
   def scale(byX: Double, byY: Double) = {
     val at = new AffineTransform()
     at.scale(byX, byY)
     
-    val result = prep
+    val result = prep(byX, byY)
     
     val scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR)
     scaleOp.filter(image, result)

@@ -6,10 +6,11 @@ import lmxml.{
   Conversion,
   PlainLmxmlParser
 }
-import lmxml.shortcuts.html.HtmlShortcuts
 
 import unfiltered.request._
 import unfiltered.response._
+
+import lmxml.shortcuts.html.HtmlShortcuts
 
 import unfiltered.netty.ServerErrorResponse
 import unfiltered.netty.cycle._
@@ -57,7 +58,5 @@ object Connect extends DefaultPlan with Conversion with ResourceLoader {
       index(retrieve("index.lmxml"))
     case Path("/connect.js") =>
       Ok ~> ContentType("text/javascript") ~> ResponseString(retrieve("connect.js"))
-    case Path(Seg("image" :: "desktop.jpg" :: Nil)) =>
-      Ok ~> ContentType("image/jpeg") ~> ResponseBytes(Robot.screenshot.data())
   }
 }

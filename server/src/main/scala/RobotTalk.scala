@@ -3,6 +3,7 @@ package server
 
 import control._
 
+import unfiltered.Cookie
 import unfiltered.netty.websockets._
 
 class EventParsing(val ident: String) {
@@ -18,6 +19,8 @@ object MouseMove extends EventParsing("mousemove")
 
 object KeyUp extends EventParsing("keyup")
 object KeyDown extends EventParsing("keydown")
+
+object RobotAuth extends EventParsing("robotauth")
 
 object RobotTalk extends Plan with CloseOnException {
   def intent = {
