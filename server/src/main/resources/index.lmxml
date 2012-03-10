@@ -3,6 +3,6 @@
 html
   head
     title "Desktop"
-    // js @src="/connect.js"
+    js @src="/connect.js"
   body
     canvas #desktop @width="{width}" @height="{height}"
