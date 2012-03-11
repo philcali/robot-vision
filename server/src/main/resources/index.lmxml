@@ -3,9 +3,13 @@
 html
   head
     title "Desktop"
+    js @src="/jquery.js"
     js @src="/desktop.js"
+    js @src="/viewport.js"
+    js @src="/interface.js"
     connect-check
       connect-check-true
         js @src="/connect.js"
   body
+    img #buffer @src="/image/desktop_1.0x1.0_0.2_p.jpg" @style="display: none;"
     canvas #desktop @width="{width}" @height="{height}"
