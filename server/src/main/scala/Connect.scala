@@ -1,16 +1,8 @@
 package capture
 package server
 
-import lmxml.{
-  LmxmlConvert,
-  Conversion,
-  PlainLmxmlParser
-}
-
 import unfiltered.request._
 import unfiltered.response._
-
-import lmxml.shortcuts.html.HtmlShortcuts
 
 import unfiltered.netty.ServerErrorResponse
 import unfiltered.netty.cycle._
@@ -34,27 +26,6 @@ trait ResourceLoader {
 }
 
 trait DefaultPlan extends Plan with ThreadPool with ServerErrorResponse
-
-trait Lmxml extends Conversion {
-  import control.Robot
-  import lmxml.XmlConvert
-  import lmxml.transforms._
-
-  def createParser(step: Int) = new PlainLmxmlParser(step) with HtmlShortcuts
-
-  def screenData = Seq(
-    "width" -> Value(Robot.display.getWidth.toInt),
-    "height" -> Value(Robot.display.getHeight.toInt)
-  )
-
-  def data: Seq[(String, Processor)]
-
-  def index(source: String) = {
-    val trans = Transform((screenData ++ data):_*)
-
-    Ok ~> Html(convert(source)(trans andThen XmlConvert))
-  }
-}
 
 object Connect extends DefaultPlan with Lmxml with ResourceLoader {
   import lmxml.transforms.If

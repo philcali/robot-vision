@@ -21,14 +21,21 @@ object DesktopImage {
 object Vision extends DefaultPlan with Lmxml with ResourceLoader {
   import lmxml.transforms.Empty
 
+  val validFiles = List("jquery.js", "desktop.js", "interface.js", "viewport.js")
+
+  object ValidJs {
+    def unapply(file: String) = {
+      if (validFiles.exists(_ == file)) Some(file) else None
+    }
+  }
+
   def data = Seq("connect-check" -> Empty)
 
   def intent = {
-    case Path("view.html") =>
+    case Path("/view.html") =>
       index(retrieve("index.lmxml"))
-    case Path("/desktop.js") =>
-      Ok ~> ContentType("text/javascript") ~>
-      ResponseString(retrieve("desktop.js"))
+    case Path(Seg(ValidJs(file) :: Nil)) =>
+      Ok ~> ContentType("text/javascript") ~> ResponseString(retrieve(file))
     case Path(Seg("image" :: DesktopImage(x, y, quality, pointer) :: Nil)) =>
       val screenshot = if (pointer)
         Robot.screenshot.withPointer

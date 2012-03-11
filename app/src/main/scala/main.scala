@@ -29,33 +29,33 @@ object Main {
   )
 
   val user = parser.option[String](
-    List("u", "user"), "user", "user to auth (None)"
+    List("u", "user"), "<none>", "user to auth"
   )
 
   val password = parser.option[String](
-    List("p", "password"), "password", "password to auth (None)"
+    List("p", "password"), "<none>", "password to auth"
   )
 
   val port = parser.option[Int](
-    List("i", "inet-port"), "port", "internet port (8080)"
+    List("i", "inet-port"), "8080", "internet port"
   )
 
   val bind = parser.option[String](
-    List("b", "bind-address"), "bind", "bind address (0.0.0.0)"
+    List("b", "bind-address"), "(0.0.0.0)", "bind address (0.0.0.0)"
   )
 
   val noConnect = parser.flag[Boolean](
-    List("n", "no-connect"), "don't serve up connection js"
+    List("n", "no-connect"),
+    "don't serve up connection js (ideal if using Chrome extension to connect)"
   )
 
-  def authed(plan: Plan) = if (!password.value.isEmpty) {
-    val u = user.value.getOrElse("")
-    val p = password.value.get
+  val participant = parser.option[String](
+    List("v", "viewer-password"), "<viewer password>",
+    "separate password for the 'viewer' user (leave blank for open)"
+  )
 
-    Planify(Auth(ValidUser(u, p))(plan.intent))
-  } else {
-    plan
-  }
+  def authed(users: Option[Users], plan: Plan) = 
+    users.map(u => Planify(Auth(u)(plan.intent))).getOrElse(plan)
 
   def main(args: Array[String]) {
     try {
@@ -64,12 +64,20 @@ object Main {
       val listen = port.value.getOrElse(8080)
       val address = bind.value.getOrElse("0.0.0.0")
 
+      val master = password.value.map { pass =>
+        ValidUser(user.value.getOrElse(""), pass)
+      }
+
+      val viewer = participant.value.map { pass =>
+        ViewingUser(master, pass)
+      }
+
       // Always have to RobotTalk, and Vision
-      val handlers = List(RobotTalk, authed(Vision)) ++
+      val handlers = List(RobotTalk, authed(viewer, Vision)) ++
         noConnect.value.map(_ =>
           List[ChannelHandler]()
         ).getOrElse(
-          List(authed(Connect))
+          List(authed(master, Connect))
         )
 
       // Https server requires extra system variables
