@@ -65,18 +65,18 @@ object Main {
       val address = bind.value.getOrElse("0.0.0.0")
 
       // Always have to RobotTalk, and Vision
-      val handlers = List({ () => RobotTalk }, { () => authed(Vision) }) ++
+      val handlers = List(RobotTalk, authed(Vision)) ++
         noConnect.value.map(_ =>
-          List[() => ChannelHandler]()
+          List[ChannelHandler]()
         ).getOrElse(
-          List({ () => authed(Connect) })
+          List(authed(Connect))
         )
 
       // Https server requires extra system variables
       secured.value.map( _ =>
-        Https(listen, address, handlers, () => ()).run()
+        handlers.foldLeft(Https(listen, address))(_.handler(_)).run()
       ) getOrElse(
-        Http(listen, address, handlers, () => ()).run()
+        handlers.foldLeft(Http(listen, address))(_.handler(_)).run()
       )
     } catch {
       case e: ArgotUsageException => println(e.message)
