@@ -35,23 +35,31 @@ trait ResourceLoader {
 
 trait DefaultPlan extends Plan with ThreadPool with ServerErrorResponse
 
-object Connect extends DefaultPlan with Conversion with ResourceLoader {
+trait Lmxml extends Conversion {
   import control.Robot
   import lmxml.XmlConvert
   import lmxml.transforms._
 
   def createParser(step: Int) = new PlainLmxmlParser(step) with HtmlShortcuts
 
-  def index(source: String) = {
-    val screen = Robot.display
+  def screenData = Seq(
+    "width" -> Value(Robot.display.getWidth.toInt),
+    "height" -> Value(Robot.display.getHeight.toInt)
+  )
 
-    val trans = Transform(
-      "width" -> Value(screen.getWidth.toInt),
-      "height" -> Value(screen.getHeight.toInt)
-    )
+  def data: Seq[(String, Processor)]
+
+  def index(source: String) = {
+    val trans = Transform((screenData ++ data):_*)
 
     Ok ~> Html(convert(source)(trans andThen XmlConvert))
   }
+}
+
+object Connect extends DefaultPlan with Lmxml with ResourceLoader {
+  import lmxml.transforms.If
+
+  def data = Seq("connect-check" -> If (true)(Nil))
 
   def intent = {
     case Path("/desktop.html") =>

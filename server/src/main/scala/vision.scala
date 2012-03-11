@@ -9,20 +9,34 @@ import unfiltered.response._
 import unfiltered.netty.cycle.Planify
 
 object DesktopImage {
-  val Pattern = """desktop_(\d+\.\d+)x(\d+\.\d+)_(\d\.\d+)\.jpg""".r
+  val Pattern = """desktop_(\d+\.\d+)x(\d+\.\d+)_(\d\.\d+)_([p|n])\.jpg""".r
 
   def unapply(image: String) = image match {
-    case Pattern(x, y, q) => Some((x.toDouble, y.toDouble, q.toFloat))
-    case _ => Some((1.0, 1.0, 0.2f))
+    case Pattern(x, y, q, p) =>
+      Some((x.toDouble, y.toDouble, q.toFloat, p == "p"))
+    case _ => Some((1.0, 1.0, 0.2f, false))
   }
 }
 
-object Vision extends Planify({
-  case Path(Seg("image" :: DesktopImage(x, y, quality) :: Nil)) =>
-    val screenshot = Robot.screenshot
+object Vision extends DefaultPlan with Lmxml with ResourceLoader {
+  import lmxml.transforms.Empty
 
-    val bytes = if (x == 1.0 && x == y)
-      screenshot.data(quality) else screenshot.scale(x, y).data(quality)
+  def data = Seq("connect-check" -> Empty)
 
-    Ok ~> ContentType("image/jpeg") ~> ResponseBytes(bytes)
-})
+  def intent = {
+    case Path("view.html") =>
+      index(retrieve("index.lmxml"))
+    case Path("/desktop.js") =>
+      Ok ~> ContentType("text/javascript") ~>
+      ResponseString(retrieve("desktop.js"))
+    case Path(Seg("image" :: DesktopImage(x, y, quality, pointer) :: Nil)) =>
+      val screenshot = if (pointer)
+        Robot.screenshot.withPointer
+      else Robot.screenshot
+
+      val bytes = if (x == 1.0 && x == y)
+        screenshot.data(quality) else screenshot.scale(x, y).data(quality)
+
+      Ok ~> ContentType("image/jpeg") ~> ResponseBytes(bytes)
+  }
+}
