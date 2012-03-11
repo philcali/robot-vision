@@ -11,6 +11,7 @@ import unfiltered.netty.cycle.{
 
 import unfiltered.request._
 import unfiltered.response._
+import org.jboss.netty.channel.ChannelHandler
 
 import server._
 
@@ -43,6 +44,10 @@ object Main {
     List("b", "bind-address"), "bind", "bind address (0.0.0.0)"
   )
 
+  val noConnect = parser.flag[Boolean](
+    List("n", "no-connect"), "don't serve up connection js"
+  )
+
   def authed(plan: Plan) = if (!password.value.isEmpty) {
     val u = user.value.getOrElse("")
     val p = password.value.get
@@ -59,18 +64,19 @@ object Main {
       val listen = port.value.getOrElse(8080)
       val address = bind.value.getOrElse("0.0.0.0")
 
+      // Always have to RobotTalk, and Vision
+      val handlers = List({ () => RobotTalk }, { () => authed(Vision) }) ++
+        noConnect.value.map(_ =>
+          List[() => ChannelHandler]()
+        ).getOrElse(
+          List({ () => authed(Connect) })
+        )
+
+      // Https server requires extra system variables
       secured.value.map( _ =>
-        Https(listen, address)
-          .handler(RobotTalk)
-          .handler(authed(Connect))
-          .handler(authed(Vision))
-          .run()
+        Https(listen, address, handlers, () => ()).run()
       ) getOrElse(
-        Http(listen, address)
-          .handler(RobotTalk)
-          .handler(authed(Connect))
-          .handler(authed(Vision))
-          .run()
+        Http(listen, address, handlers, () => ()).run()
       )
     } catch {
       case e: ArgotUsageException => println(e.message)
