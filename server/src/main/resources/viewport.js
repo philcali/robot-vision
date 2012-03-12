@@ -11,42 +11,39 @@ window.requestAnimFrame = (function(){
           };
 })();
 
-function Viewport(canvasId, desktop) {
+function Viewport(canvasId) {
   var canvas = document.getElementById(canvasId);
   var context = canvas.getContext('2d');
 
   var running = false;
 
-  return {
-    getCanvas: function() { return canvas; },
-    getContext: function() { return context; },
-    getDesktop: function() { return desktop; },
+  var self = this;
 
-    withCanvas: function(callback) { callback(canvas); },
-    withContext: function(callback) { callback(context); },
-    withDesktop: function(callback) { callback(desktop); },
+  this.getCanvas = function() { return canvas; }
+  this.getContext = function() { return context; }
 
-    withCanvasAndContext: function(callback) {
-      callback(canvas, context);
-    },
+  this.withCanvas = function(callback) { callback(canvas); }
+  this.withContext = function(callback) { callback(context); }
 
-    isRunning: function() { return running; },
+  this.withCanvasAndContext = function(callback) {
+    callback(canvas, context);
+  }
 
-    start: function() {
-      running = true;
-      $(this).trigger('start');
-    },
+  this.isRunning = function() { return running; }
 
-    stop: function() {
-      running = false;
-      $(this).trigger('stop');
-    },
+  this.start = function() {
+    running = true;
+    self.animate();
+  },
 
-    animate: function() {
-      if (running) {
-        $(this).trigger('animate');
-        window.requestAnimFrame(this.animate);
-      }
+  this.stop = function() {
+    running = false;
+  },
+
+  this.animate = function() {
+    if (self.isRunning()) {
+      $(self).trigger('reload');
+      window.requestAnimFrame(self.animate);
     }
-  };
+  }
 };

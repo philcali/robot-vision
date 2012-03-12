@@ -13,7 +13,11 @@ html
     js @src="/interface.js"
   body
     img #buffer @style="display: none;" @src="/image/desktop_1.0x1.0_0.2_p.png"
-    canvas #desktop @width="{width}" @height="{height}" @style="z-index: 0"
+    canvas #desktop @width="{width}" @height="{height}" {
+      style: "z-index: 0; position: absolute; top: 1px; left: 1px;"
+    }
     connect-check
       connect-check-true
-        canvas #control @width="{width}" @height="{height}" @style="z-index: 1"
+        canvas #control @width="{width}" @height="{height}" {
+          style: "z-index: 1; position: absolute; top: 1px; left: 1px;"
+        }
