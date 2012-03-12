@@ -25,17 +25,27 @@ trait ResourceLoader {
   }
 }
 
-trait DefaultPlan extends Plan with ThreadPool with ServerErrorResponse
+trait DefaultPlan extends Plan with ThreadPool with ServerErrorResponse {
+  val validFiles: List[String]
+
+  object ValidJs {
+    def unapply(file: String) = {
+      if (validFiles.exists(_ == file)) Some(file) else None
+    }
+  }
+}
 
 object Connect extends DefaultPlan with Lmxml with ResourceLoader {
   import lmxml.transforms.If
+
+  val validFiles = List("connect.js", "control.js")
 
   def data = Seq("connect-check" -> If (true)(Nil))
 
   def intent = {
     case Path("/desktop.html") =>
       index(retrieve("index.lmxml"))
-    case Path("/connect.js") =>
-      Ok ~> ContentType("text/javascript") ~> ResponseString(retrieve("connect.js"))
+    case Path(Seg(ValidJs(file) :: Nil)) =>
+      Ok ~> ContentType("text/javascript") ~> ResponseString(retrieve(file))
   }
 }

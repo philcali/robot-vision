@@ -23,12 +23,6 @@ object Vision extends DefaultPlan with Lmxml with ResourceLoader {
 
   val validFiles = List("jquery.js", "desktop.js", "interface.js", "viewport.js")
 
-  object ValidJs {
-    def unapply(file: String) = {
-      if (validFiles.exists(_ == file)) Some(file) else None
-    }
-  }
-
   def data = Seq("connect-check" -> Empty)
 
   def intent = {

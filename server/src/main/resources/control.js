@@ -9,6 +9,12 @@ function Control(url) {
 Control.prototype.attach = function(viewport) {
   var control = this;
 
+  // Only state change
+  viewport.withContext(function(context) {
+    context.strokeStyle = "black";
+    context.lineWidth = 2;
+  });
+
   viewport.withCanvas(function(canvas) {
     // http://www.html5canvastutorials.com/advanced/html5-canvas-mouse-coordinates/
     $(canvas).on('mousemove', function(evt) {
@@ -55,26 +61,12 @@ Control.prototype.attach = function(viewport) {
   control.drawPointer = function() {
     viewport.withContext(function(context) {
       context.beginPath();
-      context.arc(control.mousepos..x, control.mousepos.y, 3, 2 * Math.PI, false);
-      context.lineWidth = 2;
-      context.strokeStyle = "black";
+      context.arc(control.mousepos.x, control.mousepos.y, 3, 2 * Math.PI, false);
       context.stroke();
     });
   };
 
   $(control).trigger('attach', [viewport]);
-
-  $(document).on('animate', function(e, v) {
-    if (v != viewport) return;
-
-    var desktop = viewport.getDesktop();
-
-    viewport.withCanvasAndContext(function(canvas, context) {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(desktop.currentImage(), 0, 0);
-      control.drawPointer();
-    });
-  });
 
   return control;
 }

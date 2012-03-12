@@ -1,30 +1,52 @@
+// shim layer with setTimeout fallback
+// TODO: remove this, replace as chrome extension
+window.requestAnimFrame = (function(){
+  return  window.requestAnimationFrame       || 
+          window.webkitRequestAnimationFrame || 
+          window.mozRequestAnimationFrame    || 
+          window.oRequestAnimationFrame      || 
+          window.msRequestAnimationFrame     || 
+          function( callback ){
+            window.setTimeout(callback, 1000 / 60);
+          };
+})();
+
 function Viewport(canvasId, desktop) {
   var canvas = document.getElementById(canvasId);
   var context = canvas.getContext('2d');
 
-  var viewport = this;
+  var running = false;
 
-  this.getCanvas = function() { return canvas; }
-  this.getContext = function() { return context; }
-  this.getDesktop = function() { return desktop; }
+  return {
+    getCanvas: function() { return canvas; },
+    getContext: function() { return context; },
+    getDesktop: function() { return desktop; },
 
-  this.withCanvas = function(callback) { callback(canvas); }
-  this.withContext = function(callback) { callback(context); }
-  this.withDesktop = function(callback) { callback(desktop); }
+    withCanvas: function(callback) { callback(canvas); },
+    withContext: function(callback) { callback(context); },
+    withDesktop: function(callback) { callback(desktop); },
 
-  this.withCanvasAndContext = function(callback) {
-    callback(canvas, context);
-  }
+    withCanvasAndContext: function(callback) {
+      callback(canvas, context);
+    },
 
-  // Globally declare the viewport initiation.
-  $(document).trigger('viewport', [viewport]);
+    isRunning: function() { return running; },
 
-  // Begin animation cycle... Clients should hook into the reload event
-  function animate() {
-    $(viewport).trigger('reload');
+    start: function() {
+      running = true;
+      $(this).trigger('start');
+    },
 
-    requestAnimationFrame(animate);
-  }
+    stop: function() {
+      running = false;
+      $(this).trigger('stop');
+    },
 
-  setTimeout(animate, 1000);
-}
+    animate: function() {
+      if (running) {
+        $(this).trigger('animate');
+        window.requestAnimFrame(this.animate);
+      }
+    }
+  };
+};

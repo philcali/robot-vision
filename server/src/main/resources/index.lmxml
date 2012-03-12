@@ -6,10 +6,14 @@ html
     js @src="/jquery.js"
     js @src="/desktop.js"
     js @src="/viewport.js"
-    js @src="/interface.js"
     connect-check
       connect-check-true
+        js @src="/control.js"
         js @src="/connect.js"
+    js @src="/interface.js"
   body
-    img #buffer @src="/image/desktop_1.0x1.0_0.2_p.jpg" @style="display: none;"
-    canvas #desktop @width="{width}" @height="{height}"
+    img #buffer @style="display: none;" @src="/image/desktop_1.0x1.0_0.2_p.png"
+    canvas #desktop @width="{width}" @height="{height}" @style="z-index: 0"
+    connect-check
+      connect-check-true
+        canvas #control @width="{width}" @height="{height}" @style="z-index: 1"
