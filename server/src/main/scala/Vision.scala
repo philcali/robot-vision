@@ -6,8 +6,6 @@ import control.Robot
 import unfiltered.request._
 import unfiltered.response._
 
-import unfiltered.netty.cycle.Planify
-
 object DesktopImage {
   val Pattern = """desktop_(\d+\.\d+)x(\d+\.\d+)_(\d\.\d+)_([p|n])\.jpg""".r
 

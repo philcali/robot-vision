@@ -11,8 +11,9 @@ for free for Chrome users (Chromebook in particular).
 - ~Finish mapping JavaScript keyCode~
 - ~Scaling~
 - Popout interface for dynamic controls
+- interface for uploading and dowloading files
 - localStorage for some settings
-- Basic auth for viewing and controls
+- ~Basic auth for viewing and controls~
 - Add graceful failures across the board
 - Make conscripted launch for server
 - Make client portion a Chrome Extension

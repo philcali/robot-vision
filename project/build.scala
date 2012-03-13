@@ -1,6 +1,11 @@
 import sbt._
 import Keys._
 
+import less.Plugin.{
+  LessKeys,
+  lessSettings
+}
+
 object General {
   val settings: Seq[Setting[_]] = Defaults.defaultSettings ++ Seq(
     scalaVersion := "2.9.1",
@@ -24,6 +29,15 @@ object Server {
   )
 }
 
+object Less {
+  val settings: Seq[Setting[_]] = lessSettings ++ inConfig(Compile)(Seq(
+    (LessKeys.mini in LessKeys.less) := true,
+    (LessKeys.filter in LessKeys.less) := "bootstrap.less",
+    (resourceManaged in LessKeys.less) <<= (resourceDirectory)(_ / "bootstrap"),
+    (sourceDirectory in LessKeys.less) <<= (baseDirectory)(_ / "bootstrap")
+  ))
+}
+
 object CaptureBuild extends Build {
   lazy val root = Project(
     "capture",
@@ -42,7 +56,7 @@ object CaptureBuild extends Build {
   lazy val server = Project(
     "capture-server",
     file("server"),
-    settings = Server.settings
+    settings = Server.settings ++ Less.settings
   ) dependsOn control
 
   lazy val app = Project(

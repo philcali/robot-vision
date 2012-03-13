@@ -41,7 +41,7 @@ object Main {
   )
 
   val bind = parser.option[String](
-    List("b", "bind-address"), "(0.0.0.0)", "bind address (0.0.0.0)"
+    List("b", "bind-address"), "(0.0.0.0)", "bind address"
   )
 
   val noConnect = parser.flag[Boolean](
@@ -54,8 +54,28 @@ object Main {
     "separate password for the 'viewer' user (leave blank for open)"
   )
 
+  val generateSecret = parser.flag[Boolean](
+    List("s", "secret"), "generate a secret key to be pass to socket program"
+  )
+
   def authed(users: Option[Users], plan: Plan) = 
     users.map(u => Planify(Auth(u)(plan.intent))).getOrElse(plan)
+
+  def generateKey() {
+    val path = new java.io.File(System.getProperty("user.home"), ".robo-vision")
+    if (!path.exists) {
+      path.mkdirs()
+    }
+
+    import java.math.BigInteger
+    import java.io.FileWriter
+
+    val writer = new FileWriter(new java.io.File(path, "vision.sec"))
+    val random = new java.security.SecureRandom()
+
+    writer.write(new BigInteger(130, random).toString(32))
+    writer.close()
+  }
 
   def main(args: Array[String]) {
     try {
@@ -72,7 +92,7 @@ object Main {
         ViewingUser(master, pass)
       }
 
-      // Always have to RobotTalk, and Vision
+      // Always have RobotTalk and Vision
       val handlers = List(RobotTalk, authed(viewer, Vision)) ++
         noConnect.value.map(_ =>
           List[ChannelHandler]()
