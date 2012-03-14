@@ -1,6 +1,6 @@
 $(function() {
   var viewport = new Viewport('desktop');
-  var desktop = new Desktop('buffer', { pointer: true });
+  var desktop = new Desktop('buffer', { pointer: true, interval: 1000 });
 
   // Specifically use the image buffer, to offload the desktop render
   $(desktop).on('reload', function(e, image) {

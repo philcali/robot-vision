@@ -30,10 +30,36 @@ object Server {
 }
 
 object Less {
+  val copy = TaskKey[Seq[File]]("copy-bootstrap-js")
+
+  val destJs = SettingKey[File]("copy-javascript-directory")
+
+  val destPng = SettingKey[File]("copy-glyphs-directory")
+
+  private def copyTask =
+    (streams, destJs, destPng, sourceDirectory in (Compile, LessKeys.less)) map {
+      (s, js, png, source) =>
+        val perform = (oldFile: File, newFile: File) => {
+          if (!newFile.exists) {
+            s.log.info("Copying %s to %s" format(oldFile, newFile))
+            IO.copyFile(oldFile, newFile)
+          }
+          newFile
+        }
+        (source / "js" * "*.js").get.map(f => perform(f, js / f.name)) ++
+        (source / "img" * "*.png").get.map(f => perform(f, png / f.name))
+      }
+
   val settings: Seq[Setting[_]] = lessSettings ++ inConfig(Compile)(Seq(
+    destJs <<= (resourceDirectory)(_ / "js"),
+    destPng <<= (resourceDirectory)(_ / "img"),
+    copy <<= copyTask,
+    cleanFiles <+= destJs,
+    cleanFiles <+= destPng,
+    LessKeys.less <<= LessKeys.less dependsOn copy,
     (LessKeys.mini in LessKeys.less) := true,
     (LessKeys.filter in LessKeys.less) := "bootstrap.less",
-    (resourceManaged in LessKeys.less) <<= (resourceDirectory)(_ / "bootstrap"),
+    (resourceManaged in LessKeys.less) <<= (resourceDirectory)(_ / "css"),
     (sourceDirectory in LessKeys.less) <<= (baseDirectory)(_ / "bootstrap")
   ))
 }

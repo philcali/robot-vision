@@ -3,7 +3,9 @@
 html
   head
     title "Desktop"
+    css @href="/bootstrap.css"
     js @src="/jquery.js"
+    js @src="/bootstrap-collapse.js"
     js @src="/desktop.js"
     js @src="/viewport.js"
     connect-check
@@ -12,12 +14,26 @@ html
         js @src="/connect.js"
     js @src="/interface.js"
   body
-    img #buffer @style="display: none;" @src="/image/desktop_1.0x1.0_0.2_p.png"
+    >.navbar .navbar-fixed-top
+      >.navbar-inner
+        >.container
+          a .btn .btn-navbar @data-toggle="collapse" @data-target=".nav-collapse"
+            span .icon-bar
+            span .icon-bar
+            span .icon-bar
+          a .brand @href="#" desktop-name
+          >.nav-collapse
+            ul.nav
+              li a @href="#" i .icon-camera
+              li a @href="#"
+                  i .icon-cog
+                  "Settings"
+    img #buffer @style="display: none;" @src="/image/desktop_1.0x1.0_0.2_p.jpg"
     canvas #desktop @width="{width}" @height="{height}" {
-      style: "z-index: 0; position: absolute; top: 1px; left: 1px;"
+      style: "z-index: 0; position: absolute; top: 40px; left: 0px;"
     }
     connect-check
       connect-check-true
         canvas #control @width="{width}" @height="{height}" {
-          style: "z-index: 1; position: absolute; top: 1px; left: 1px;"
+          style: "z-index: 1; position: absolute; top: 40px; left: 0px;"
         }

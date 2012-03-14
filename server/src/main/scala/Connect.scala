@@ -17,11 +17,15 @@ trait ResourceLoader {
   }
 
   def retrieve(file: String) = {
+    new String(retrieveBytes(file), "UTF-8")
+  }
+
+  def retrieveBytes(file: String) = {
     val s = getClass.getResourceAsStream("/" + file)
     val bs = new java.io.ByteArrayOutputStream()
     pump(s, bs)
 
-    new String(bs.toByteArray, "UTF-8")
+    bs.toByteArray
   }
 }
 

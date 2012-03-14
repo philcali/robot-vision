@@ -12,12 +12,15 @@ import lmxml.shortcuts.html.HtmlShortcuts
 
 import unfiltered.response._
 
+import java.net.InetAddress
+
 trait Lmxml extends Conversion {
   import control.Robot
 
   def createParser(step: Int) = new PlainLmxmlParser(step) with HtmlShortcuts
 
   def screenData = Seq(
+    "desktop-name" -> Value(InetAddress.getLocalHost.getHostName),
     "width" -> Value(Robot.display.getWidth.toInt),
     "height" -> Value(Robot.display.getHeight.toInt)
   )

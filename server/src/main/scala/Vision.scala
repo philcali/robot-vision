@@ -16,6 +16,18 @@ object DesktopImage {
   }
 }
 
+object BootstrapJs {
+  val Pattern = """^bootstrap\-\w+\.js""".r
+
+  def unapply(script: String) = Pattern.findFirstIn(script).map("js/" + _)
+}
+
+object Glyphs {
+  val Pattern = """.*\.png$""".r
+
+  def unapply(path: String) = Pattern.findFirstIn(path).map(_.drop(1).mkString)
+}
+
 object Vision extends DefaultPlan with Lmxml with ResourceLoader {
   import lmxml.transforms.Empty
 
@@ -26,7 +38,14 @@ object Vision extends DefaultPlan with Lmxml with ResourceLoader {
   def intent = {
     case Path("/view.html") =>
       index(retrieve("index.lmxml"))
+    case Path("/bootstrap.css") =>
+      Ok ~> CssContent ~> ResponseString(retrieve("css/less/bootstrap.css"))
+    case Path(Glyphs(image)) =>
+      println(image)
+      Ok ~> ContentType("image/png") ~> ResponseBytes(retrieveBytes(image))
     case Path(Seg(ValidJs(file) :: Nil)) =>
+      Ok ~> ContentType("text/javascript") ~> ResponseString(retrieve(file))
+    case Path(Seg(BootstrapJs(file) :: Nil)) =>
       Ok ~> ContentType("text/javascript") ~> ResponseString(retrieve(file))
     case Path(Seg("image" :: DesktopImage(x, y, quality, pointer) :: Nil)) =>
       val screenshot = if (pointer)

@@ -106,6 +106,7 @@ object Main {
       ) getOrElse(
         handlers.foldLeft(Http(listen, address))(_.handler(_)).run()
       )
+
     } catch {
       case e: ArgotUsageException => println(e.message)
     }
