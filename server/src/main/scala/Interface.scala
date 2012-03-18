@@ -37,7 +37,7 @@ trait Interface extends DefaultPlan with Lmxml {
         Ok ~>
         Attachment("Snapshot-%s.jpg".format(pattern.format(now))) ~>
         ContentType("image/jpeg") ~>
-        ResponseBytes(capture.control.Robot.screenshot.data(1.0f))
+        ResponseBytes(capture.control.Robot.screenshot.withPointer.data(1.0f))
       )
   }
 
