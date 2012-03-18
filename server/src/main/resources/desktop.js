@@ -10,11 +10,20 @@ function Desktop(elem, obj) {
   this.quality = typeof obj.quality === 'undefined' ? "0.2" : obj.quality + '';
   this.pointer = typeof obj.pointer === 'undefined' ? false : obj.pointer;
 
+  var self = this;
+
   // private members
   var image = document.getElementById(elem);
-  var running = false;
+  image.onload = function() {
+    $(self).trigger('reload', [image]);
 
-  var self = this;
+    // Redraw desktop only after the last draw
+    if (self.isRunning()) {
+      setTimeout(self.execute, self.interval);
+    }
+  };
+
+  var running = false;
 
   this.buildUrl = function() {
     var p = self.pointer ? 'p' : 'n';
@@ -25,20 +34,7 @@ function Desktop(elem, obj) {
   };
 
   this.execute = function() {
-    var newImage = new Image();
-
-    newImage.onload = function() {
-      image = newImage;
-
-      $(self).trigger('reload', [newImage]);
-
-      // Redraw desktop only after the last draw
-      if (self.isRunning()) {
-        setTimeout(self.execute, self.interval);
-      }
-    };
-
-    newImage.src = self.buildUrl();
+    image.src = self.buildUrl();
   }
 
   this.isRunning = function() { return running; }

@@ -4,15 +4,25 @@ html
   head
     title "Desktop"
     css @href="/bootstrap.css"
+    css ```
+    .viewport {
+      width:{width}px;
+      height:{height}px;
+      z-index: 0;
+      position: absolute;
+      top: 40px;
+      left: 0px;
+    }
+        ```
     js @src="/jquery.js"
     js @src="/bootstrap-collapse.js"
     js @src="/desktop.js"
     js @src="/viewport.js"
+    js @src="/interface.js"
     connect-check
       connect-check-true
         js @src="/control.js"
         js @src="/connect.js"
-    js @src="/interface.js"
   body
     >.navbar .navbar-fixed-top
       >.navbar-inner
@@ -24,14 +34,12 @@ html
           a .brand @href="#" desktop-name
           >.nav-collapse
             ul.nav
-              li a @href="#" i .icon-camera
+              li a @href="#" i .icon-camera .icon-white
               li a @href="#"
-                  i .icon-cog
+                  i .icon-cog .icon-white
                   "Settings"
-    img #buffer @style="display: none;" @src="/image/desktop_1.0x1.0_0.2_p.jpg"
-    canvas #desktop @width="{width}" @height="{height}" {
-      style: "z-index: 0; position: absolute; top: 40px; left: 0px;"
-    }
+    >#buffer .viewport
+      img #desktop @src="/image/desktop_1.0x1.0_0.2_p.jpg"
     connect-check
       connect-check-true
         canvas #control @width="{width}" @height="{height}" {

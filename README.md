@@ -13,7 +13,9 @@ for free for Chrome users (Chromebook in particular).
 - Popout interface for dynamic controls
 - interface for uploading and dowloading files
 - localStorage for some settings
+- Switch plan to Async plans for consistency
+- Extractor for common (separate) interface sections
 - ~Basic auth for viewing and controls~
-- Add graceful failures across the board
+- ~Add graceful failures across the board~
 - Make conscripted launch for server
-- Make client portion a Chrome Extension
+- Make client (socket) portion a Chrome Extension

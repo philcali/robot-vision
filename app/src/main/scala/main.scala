@@ -4,6 +4,7 @@ import unfiltered.netty.{
   Http,
   Https
 }
+import unfiltered.netty.async
 import unfiltered.netty.cycle.{
   Plan,
   Planify
@@ -58,8 +59,17 @@ object Main {
     List("s", "secret"), "generate a secret key to be pass to socket program"
   )
 
-  def authed(users: Option[Users], plan: Plan) = 
-    users.map(u => Planify(Auth(u)(plan.intent))).getOrElse(plan)
+  val jpegCamera = parser.flag[Boolean](
+    List("j", "jpeg-camera"), "Serves image data via jpeg camera transport"
+  )
+
+  val frameRate = parser.option[Int](
+    List("f", "framerate"), "framerate 30",
+    "If in jpeg camera mode, push image data at specified framerate"
+  )
+
+  def authed(users: Option[Users], plan: async.Plan) =
+    users.map(u => async.Planify(Auth(u)(plan.intent))).getOrElse(plan)
 
   def generateKey() {
     val path = new java.io.File(System.getProperty("user.home"), ".robo-vision")
@@ -92,20 +102,37 @@ object Main {
         ViewingUser(master, pass)
       }
 
-      // Always have RobotTalk and Vision
-      val handlers = List(RobotTalk, authed(viewer, Vision)) ++
-        noConnect.value.map(_ =>
-          List[ChannelHandler]()
-        ).getOrElse(
-          List(authed(master, Connect))
-        )
+      val vision = jpegCamera.value.map(_ =>
+        ImageStream).orElse(Some(Vision)).map(authed(viewer, _)).get
 
-      // Https server requires extra system variables
-      secured.value.map( _ =>
-        handlers.foldLeft(Https(listen, address))(_.handler(_)).run()
-      ) getOrElse(
-        handlers.foldLeft(Http(listen, address))(_.handler(_)).run()
+      val connect = noConnect.value.map(_ =>
+        List[ChannelHandler]()
+      ).getOrElse(
+        List(authed(master, Connect))
       )
+
+      // Always have RobotTalk and Vision
+      val handlers = List(RobotTalk, vision) ++ connect
+
+      def buildServer() {
+        // Https server requires extra system variables
+        secured.value.map( _ =>
+          handlers.foldLeft(Https(listen, address))(_.handler(_)).run()
+        ) getOrElse {
+          handlers.foldLeft(Http(listen, address))(_.handler(_)).run()
+        }
+      }
+
+      jpegCamera.value.orElse(Some(false)).map{ isJpeg =>
+        if (isJpeg) {
+          val service = ImageService(frameRate.value.getOrElse(30))
+          service.start()
+          buildServer()
+          service ! Quit
+        } else {
+          buildServer()
+        }
+      }
 
     } catch {
       case e: ArgotUsageException => println(e.message)

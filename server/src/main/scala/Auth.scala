@@ -3,7 +3,10 @@ package server
 
 import unfiltered.request._
 import unfiltered.response._
-import unfiltered.Cycle
+import unfiltered.{
+  Cycle,
+  Async
+}
 
 trait Users {
   def auth(u: String, p: String): Boolean
@@ -19,11 +22,11 @@ case class ViewingUser(valid: Option[ValidUser], pass: String) extends Users {
 }
 
 case class Auth(users: Users) {
-  def apply[A,B](intent: Cycle.Intent[A,B]) =
-    Cycle.Intent[A,B] {
+  def apply[A, B](intent: Async.Intent[A,B]) =
+    Async.Intent[A,B] {
       case req @ BasicAuth(user, pass) if (users.auth(user, pass)) =>
-        Cycle.Intent.complete(intent)(req)
-      case _ =>
-        Unauthorized ~> WWWAuthenticate("""Basic realm="/" """)
+        intent(req)
+      case req =>
+        req.respond(Unauthorized ~> WWWAuthenticate("""Basic realm="/" """))
     }
 }
