@@ -34,10 +34,8 @@ html
           a .brand @href="#" desktop-name
           >.nav-collapse
             ul.nav
-              li a @href="#" i .icon-camera .icon-white
-              li a @href="#"
-                  i .icon-cog .icon-white
-                  "Settings"
+              li a @href="/snapshot.jpg" "Snapshot"
+              li a @href="#" "Settings"
     >#buffer .viewport
       img #desktop @src="/image/desktop_1.0x1.0_0.2_p.jpg"
     connect-check

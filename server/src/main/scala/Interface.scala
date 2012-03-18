@@ -7,8 +7,16 @@ import unfiltered.response._
 import unfiltered.netty.async
 import unfiltered.netty.ServerErrorResponse
 
+case class Attachment(filename: String) extends Responder[Any] {
+  def respond(res: HttpResponse[Any]) {
+    res.header("Content-Disposition", "attachment; filename=%s".format(filename))
+  }
+}
+
 trait Interface extends DefaultPlan with Lmxml {
   import lmxml.transforms.Empty
+
+  val pattern = new java.text.SimpleDateFormat("MM-dd-yy KK:mm:ss a")
 
   val validFiles =
     List("jquery.js", "desktop.js", "interface.js", "viewport.js")
@@ -23,6 +31,14 @@ trait Interface extends DefaultPlan with Lmxml {
     case req @ Path(Seg(ValidJs(rf) :: Nil)) => req.respond(rf)
     case req @ Path(Seg(Bootstrap(rf) :: Nil)) => req.respond(rf)
     case req @ Path(Seg("img" :: Bootstrap(rf) :: Nil)) => req.respond(rf)
+    case req @ Path(Seg("snapshot.jpg" :: Nil)) =>
+      val now = new java.util.Date(System.currentTimeMillis)
+      req.respond(
+        Ok ~>
+        Attachment("Snapshot-%s.jpg".format(pattern.format(now))) ~>
+        ContentType("image/jpeg") ~>
+        ResponseBytes(capture.control.Robot.screenshot.data(1.0f))
+      )
   }
 
   def intent = preload orElse defaults
