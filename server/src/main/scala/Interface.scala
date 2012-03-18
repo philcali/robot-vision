@@ -19,7 +19,7 @@ trait Interface extends DefaultPlan with Lmxml {
   val pattern = new java.text.SimpleDateFormat("MM-dd-yy KK:mm:ss a")
 
   val validFiles =
-    List("jquery.js", "desktop.js", "interface.js", "viewport.js")
+    List("lib/jquery.js", "lib/desktop.js", "interface.js", "lib/viewport.js")
 
   def data = Seq("connect-check" -> Empty)
 
@@ -28,7 +28,7 @@ trait Interface extends DefaultPlan with Lmxml {
   def defaults: async.Plan.Intent = {
     case req @ Path("/view.html") =>
       req.respond(index(Resource.retrieve("index.lmxml")))
-    case req @ Path(Seg(ValidJs(rf) :: Nil)) => req.respond(rf)
+    case req @ Path(StripSlash(ValidJs(rf))) => req.respond(rf)
     case req @ Path(Seg(Bootstrap(rf) :: Nil)) => req.respond(rf)
     case req @ Path(Seg("img" :: Bootstrap(rf) :: Nil)) => req.respond(rf)
     case req @ Path(Seg("snapshot.jpg" :: Nil)) =>
@@ -47,6 +47,11 @@ trait Interface extends DefaultPlan with Lmxml {
 trait DefaultPlan extends async.Plan with ServerErrorResponse {
   // Allow plan to determine what js files are valid
   val validFiles: List[String]
+
+  object StripSlash {
+    def unapply(path: String) =
+      if (path.startsWith("/")) Some(path.drop(1).mkString) else None
+  }
 
   object ValidJs {
     def unapply(file: String) = {

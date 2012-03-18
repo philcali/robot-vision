@@ -1,3 +1,6 @@
 [submodule "server/bootstrap"]
 	path = server/bootstrap
 	url = git://github.com/twitter/bootstrap.git
+[submodule "server/src/main/resources/lib"]
+	path = server/src/main/resources/lib
+	url = git://github.com/philcali/robot-interface.git
