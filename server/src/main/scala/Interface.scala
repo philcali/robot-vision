@@ -18,12 +18,11 @@ trait Interface extends DefaultPlan with Lmxml {
   def preload: async.Plan.Intent
 
   def defaults: async.Plan.Intent = {
-    case req => req match {
-      case Path("/view.html") =>
-        req.respond(index(Resource.retrieve("index.lmxml")))
-      case Path(Seg(ValidJs(rf) :: Nil)) => req.respond(rf)
-      case Path(Seg(Bootstrap(rf) :: Nil)) => req.respond(rf)
-    }
+    case req @ Path("/view.html") =>
+      req.respond(index(Resource.retrieve("index.lmxml")))
+    case req @ Path(Seg(ValidJs(rf) :: Nil)) => req.respond(rf)
+    case req @ Path(Seg(Bootstrap(rf) :: Nil)) => req.respond(rf)
+    case req @ Path(Seg("img" :: Bootstrap(rf) :: Nil)) => req.respond(rf)
   }
 
   def intent = preload orElse defaults
@@ -59,7 +58,7 @@ object Bootstrap {
     val Pattern = """.*\.png$""".r
 
     def unapply(path: String) =
-      Pattern.findFirstIn(path).map(_.drop(1).mkString)
+      Pattern.findFirstIn(path).map("img/" + _)
   }
 
   def respond(t: String, contents: Array[Byte]) = {

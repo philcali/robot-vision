@@ -39,15 +39,17 @@ object ImageStream extends Interface {
   val listeners = new DefaultChannelGroup
 
   def preload = {
+    // Imagine this file will actually be different
+    // For now we'll just blank it out
+    case req @ Path("/interface.js") => req.respond(interface)
     case req @ Path(Seg("image" :: DesktopImage(x, y, q, p) :: Nil)) =>
+      // TODO: What about the controller changing service settings?
       val initial = req.underlying.defaultResponse(MixedReplace)
       val ch = req.underlying.event.getChannel
       ch.write(initial).addListener { () =>
         listeners.add(ch)
+        ImageService ! Write
       }
-    // Imagine this file will actually be different
-    // For now we'll just blank it out
-    case req @ Path("/interface.js") => req.respond(interface)
   }
 
   // Write complete boundary jpeg data

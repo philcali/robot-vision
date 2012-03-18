@@ -8,7 +8,7 @@ case object Write
 case object Quit
 
 // Start the image service serving at the specified frame rate
-case class ImageService(rate: Int) extends actors.Actor {
+object ImageService extends actors.Actor { service =>
   @volatile private var stopping = false
 
   @volatile private var settings = ImageProps(1.0, 1.0, 0.2f, true)
@@ -17,11 +17,8 @@ case class ImageService(rate: Int) extends actors.Actor {
     loopWhile(isRunning) {
       react {
         case ImageProps(x, y, q, p) => settings = ImageProps(x, y, q, p)
-        case Quit => stop()
-        case Write =>
-          forwardWrite()
-          Thread.sleep(rate)
-          this ! Write
+        case Quit => stopping = true
+        case Write => forwardWrite(); sender ! Write
       }
     }
   }
@@ -34,10 +31,20 @@ case class ImageService(rate: Int) extends actors.Actor {
     ImageStream.write(data)
   }
 
-  def stop() = {
-    stopping = true
-  }
+  def stop() = service ! Quit
 
   def isRunning() = !stopping
 }
 
+case class Pulse(rate: Int) extends actors.Actor { 
+  def act = {
+    this ! Write
+    loopWhile(ImageService.isRunning()) {
+      react {
+        case Write =>
+          Thread.sleep(rate)
+          ImageService ! Write
+      }
+    }
+  }
+}

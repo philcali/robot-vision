@@ -102,8 +102,11 @@ object Main {
         ViewingUser(master, pass)
       }
 
-      val vision = jpegCamera.value.map(_ =>
-        ImageStream).orElse(Some(Vision)).map(authed(viewer, _)).get
+      val pulse = jpegCamera.value.map { _ =>
+        Pulse(frameRate.value.getOrElse(30))
+      }
+
+      val vision = authed(viewer, pulse.map(_ => ImageStream).getOrElse(Vision))
 
       val connect = noConnect.value.map(_ =>
         List[ChannelHandler]()
@@ -123,15 +126,13 @@ object Main {
         }
       }
 
-      jpegCamera.value.orElse(Some(false)).map{ isJpeg =>
-        if (isJpeg) {
-          val service = ImageService(frameRate.value.getOrElse(30))
-          service.start()
-          buildServer()
-          service ! Quit
-        } else {
-          buildServer()
-        }
+      pulse.map { p =>
+        ImageService.start()
+        p.start()
+        buildServer()
+        ImageService.stop()
+      } getOrElse {
+        buildServer()
       }
 
     } catch {
