@@ -25,7 +25,7 @@ case class Auth(users: Users) {
   def apply[A, B](intent: Async.Intent[A,B]) =
     Async.Intent[A,B] {
       case req @ BasicAuth(user, pass) if (users.auth(user, pass)) =>
-        intent(req)
+        intent.lift(req)
       case req =>
         req.respond(Unauthorized ~> WWWAuthenticate("""Basic realm="/" """))
     }
