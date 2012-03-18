@@ -1,4 +1,4 @@
-# Remote Capture (name is bound to change)
+# Robot Vision
 
 - Netty websocket server to control your machine
 
