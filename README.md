@@ -99,7 +99,6 @@ way to fix this, atm, is to re-run `rvc` with the `-c` or `--clear-keys` flag.
 
 - Popout interface for dynamic controls
 - interface for uploading and dowloading files
-- Make conscripted launch for server
 
 ## License
 
