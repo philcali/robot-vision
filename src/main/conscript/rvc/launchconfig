@@ -1,8 +1,8 @@
 [app]
-  version: "0.0.1"
-  org: "org.github.philcali"
-  name: "capture-app"
-  class: "capture.app.Main"
+  version: 0.0.1
+  org: org.github.philcali
+  name: capture-app
+  class: capture.app.Main
 [scala]
   version: 2.9.1
 [repositories]
