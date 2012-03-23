@@ -60,6 +60,10 @@ OPTIONS
 --framerate framerate 30             If in jpeg camera mode, push image data at
                                      specified framerate
 
+-g
+--gen-secret                         generate a secret key to be passed to
+                                     socket program
+
 -i 8080
 --inet-port 8080                     internet port
 
@@ -75,8 +79,7 @@ OPTIONS
 --password <none>                    password to auth
 
 -s
---secret                             generate a secret key to be passed to
-                                     socket program
+--secured                            https server (http)
 
 -u <none>
 --user <none>                        user to auth

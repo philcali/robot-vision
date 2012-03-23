@@ -1,4 +1,5 @@
 package capture
+package app
 
 import unfiltered.netty.{
   Http,
@@ -56,7 +57,7 @@ object Main {
   )
 
   val generateSecret = parser.flag[Boolean](
-    List("s", "secret"), "generate a secret key to be passed to socket program"
+    List("g", "gen-secret"), "generate a secret key to be passed to socket program"
   )
 
   val jpegCamera = parser.flag[Boolean](
@@ -142,3 +143,11 @@ object Main {
   }
 }
 
+class Main extends xsbti.AppMain {
+  case class Exit(code: Int) extends xsbti.Exit
+
+  def run(configuration: xsbti.AppConfiguration) = {
+    Main.main(configuration.arguments)
+    Exit(0)
+  }
+}
