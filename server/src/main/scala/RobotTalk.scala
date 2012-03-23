@@ -20,24 +20,54 @@ object MouseMove extends EventParsing("mousemove")
 object KeyUp extends EventParsing("keyup")
 object KeyDown extends EventParsing("keydown")
 
-object RobotAuth extends EventParsing("robotauth")
+object RobotAuth extends EventParsing("auth")
 
-object RobotTalk extends Plan with CloseOnException {
+case class RobotTalk(secret: String) extends Plan with CloseOnException {
+  @volatile private var controller: Option[Int] = None
+
+  def check(pred: Int => Boolean)(block: => Unit) {
+    controller.map(i => if (pred(i)) block) 
+  }
+
+  // Extra protection
+  def isController(socket: WebSocket) = {
+    controller.map(_ == socket.channel.getId).getOrElse(false)
+  }
+
   def intent = {
     case _ => {
+      case Open(s) =>
+        check(_ != s.channel.getId) {
+          s.send("Already being controlled")
+        }
       case Message(s, Text(msg)) => msg match {
-        case KeyUp(KeyTranslate(keyCode)) =>
-          Robot(_.keyRelease(keyCode))
-        case KeyDown(KeyTranslate(keyCode)) =>
-          Robot(_.keyPress(keyCode))
-        case MouseUp(MouseTranslate(button)) =>
-          Robot(_.mouseRelease(button))
-        case MouseDown(MouseTranslate(button)) =>
-          Robot(_.mousePress(button))
-        case MouseMove(xStr, yStr) =>
-          Robot(_.mouseMove(xStr.toInt, yStr.toInt))
+        case RobotAuth(key) if controller.isEmpty =>
+          if (key == secret) {
+            controller = Some(s.channel.getId)
+            s.send("connect")
+          } else {
+            s.send("bad key - %s" format key)
+          }
+        case _ if isController(s) => RobotProtect.message(s, msg)
       }
+      case Close(s) =>
+        check(_ == s.channel.getId)(controller = None)
     }
   }
   def pass: Plan.PassHandler = (_.sendUpstream(_)) 
+}
+
+object RobotProtect {
+  def message(s: WebSocket, msg: String) = msg match {
+    case KeyUp(KeyTranslate(keyCode)) =>
+      Robot(_.keyRelease(keyCode))
+    case KeyDown(KeyTranslate(keyCode)) =>
+      Robot(_.keyPress(keyCode))
+    case MouseUp(MouseTranslate(button)) =>
+      Robot(_.mouseRelease(button))
+    case MouseDown(MouseTranslate(button)) =>
+      Robot(_.mousePress(button))
+    case MouseMove(xStr, yStr) =>
+      Robot(_.mouseMove(xStr.toInt, yStr.toInt))
+  }
 }

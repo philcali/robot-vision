@@ -40,3 +40,6 @@ html
     canvas #control @width="{width}" @height="{height}" {
       style: "z-index: 1; position: absolute; top: 40px; left: 0px;"
     }
+    connect-check
+      connect-check-true
+        >#robot-key @style="display: none;" "{robot-key}"

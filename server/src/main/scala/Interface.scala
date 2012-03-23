@@ -26,7 +26,7 @@ trait Interface extends DefaultPlan with Lmxml {
   def preload: async.Plan.Intent
 
   def defaults: async.Plan.Intent = {
-    case req @ Path("/view.html") =>
+    case req @ Path("/robot-vision.html") =>
       req.respond(index(Resource.retrieve("index.lmxml")))
     case req @ Path(StripSlash(ValidJs(rf))) => req.respond(rf)
     case req @ Path(Seg(Bootstrap(rf) :: Nil)) => req.respond(rf)
