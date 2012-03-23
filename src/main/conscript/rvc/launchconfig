@@ -1,6 +1,6 @@
 [app]
   version: 0.0.1
-  org: org.github.philcali
+  org: com.github.philcali
   name: capture-app
   class: capture.app.Main
 [scala]
