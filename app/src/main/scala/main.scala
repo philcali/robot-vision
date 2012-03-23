@@ -21,9 +21,9 @@ import org.clapper.argot._
 object Main {
   import ArgotConverters._
 
-  val preUsage = "Remote Control: Version 0.1 Copyright(c) 2012, Philip M. Cali"
+  val preUsage = "Robot Vision Control: Version 0.1 Copyright(c) 2012, Philip M. Cali"
 
-  val parser = new ArgotParser("control", preUsage=Some(preUsage))
+  val parser = new ArgotParser("rvc", preUsage=Some(preUsage))
 
   val secured = parser.flag[Boolean](
     List("s", "secured"), "https server (http)"
@@ -68,12 +68,22 @@ object Main {
     "If in jpeg camera mode, push image data at specified framerate"
   )
 
+  val clear = parser.flag[Boolean](
+    List("c", "clear-keys"), "Clears stuck keyboard inputs."
+  )
+
   def authed(users: Option[Users], plan: async.Plan) =
     users.map(u => async.Planify(Auth(u)(plan.intent))).getOrElse(plan)
 
   def main(args: Array[String]) {
     try {
       parser.parse(args)
+
+      // TODO: remove this
+      clear.value.map { _ =>
+        import control._
+        (1 to 222).map(k => Robot(_.keyRelease(KeyTranslate(k.toString))))
+      }
 
       val listen = port.value.getOrElse(8080)
       val address = bind.value.getOrElse("0.0.0.0")
