@@ -56,7 +56,7 @@ object Main {
   )
 
   val generateSecret = parser.flag[Boolean](
-    List("s", "secret"), "generate a secret key to be pass to socket program"
+    List("s", "secret"), "generate a secret key to be passed to socket program"
   )
 
   val jpegCamera = parser.flag[Boolean](
@@ -70,22 +70,6 @@ object Main {
 
   def authed(users: Option[Users], plan: async.Plan) =
     users.map(u => async.Planify(Auth(u)(plan.intent))).getOrElse(plan)
-
-  def generateKey() {
-    val path = new java.io.File(System.getProperty("user.home"), ".robo-vision")
-    if (!path.exists) {
-      path.mkdirs()
-    }
-
-    import java.math.BigInteger
-    import java.io.FileWriter
-
-    val writer = new FileWriter(new java.io.File(path, "vision.sec"))
-    val random = new java.security.SecureRandom()
-
-    writer.write(new BigInteger(130, random).toString(32))
-    writer.close()
-  }
 
   def main(args: Array[String]) {
     try {
@@ -106,16 +90,23 @@ object Main {
         Pulse(frameRate.value.getOrElse(30))
       }
 
+      val secret = generateSecret.value.map { _ =>
+        println("Wrote secret to %s" format PrivateKey.file)
+        PrivateKey.save()
+      } getOrElse {
+        PrivateKey.retrieve.getOrElse(PrivateKey.generate)
+      }
+
       val vision = authed(viewer, pulse.map(_ => ImageStream).getOrElse(Vision))
 
       val connect = noConnect.value.map(_ =>
         List[ChannelHandler]()
       ).getOrElse(
-        List(authed(master, Connect))
+        List(authed(master, Connect(secret)))
       )
 
       // Always have RobotTalk and Vision
-      val handlers = List(RobotTalk, vision) ++ connect
+      val handlers = List(RobotTalk(secret), vision) ++ connect
 
       def buildServer() {
         // Https server requires extra system variables
