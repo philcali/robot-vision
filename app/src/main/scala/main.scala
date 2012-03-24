@@ -14,6 +14,7 @@ import unfiltered.netty.cycle.{
 import unfiltered.request._
 import unfiltered.response._
 import org.jboss.netty.channel.ChannelHandler
+import java.io.File
 
 import server._
 
@@ -73,8 +74,32 @@ object Main {
     List("c", "clear-keys"), "Clears stuck keyboard inputs."
   )
 
+  val keyStoreInfo = parser.option[java.io.File](
+    List("k", "key-store"), "/path/to/ssl.properties",
+    "To be used with --secured. This is the properties file containing netty ssl info."
+  ) {
+    (s, opt) => new File(s)
+  }
+
   def authed(users: Option[Users], plan: async.Plan) =
     users.map(u => async.Planify(Auth(u)(plan.intent))).getOrElse(plan)
+
+  def propertyChecks(file: File) = {
+    if (!file.exists) {
+      throw new ArgotUsageException("%s does not exists." format file)
+    } else if (file.isDirectory) {
+      throw new ArgotUsageException("%s is a directory." format file)
+    }
+    file
+  }
+
+  def readSslProperties(file: File) {
+    println("[CONFIG] setting ssl props from %s" format file)
+    val p = new java.util.Properties(System.getProperties)
+    p.load(new java.io.FileInputStream(file))
+
+    System.setProperties(p)
+  }
 
   def main(args: Array[String]) {
     try {
@@ -125,9 +150,13 @@ object Main {
 
       def buildServer() {
         // Https server requires extra system variables
-        val s: unfiltered.util.RunnableServer = secured.value.map( _ =>
+        val s: unfiltered.util.RunnableServer = secured.value.map { _ =>
+          val lKey = Some(new File(PrivateKey.folder, "ssl.prop"))
+
+          keyStoreInfo.value.orElse(lKey).map(propertyChecks).map(readSslProperties)
+
           handlers.foldLeft(Https(listen, address))(_.handler(_))
-        ) getOrElse {
+        } getOrElse {
           handlers.foldLeft(Http(listen, address))(_.handler(_))
         }
 

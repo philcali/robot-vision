@@ -47,6 +47,25 @@ The extension is available at [robot-chrome][vision-ext].
 
 [vision-ext]: https://github.com/philcali/robot-chrome
 
+__Note__: Chrome extension integration requires that the `-g` flag is run at
+least once to generate the 32 character random string for authentication.
+
+## SSL Properties
+
+RVC supports https with the `-s` flag. It is important to note that https
+requests will __always__ fail until (at least) two system properties are set:
+
+1. `netty.ssl.keyStore`
+2. `netty.ssl.keyStorePassword`
+
+You can supply a properties file containing this information with `-k ssl.prop`,
+or the program will look at `~/.robot-vision/ssl.prop` for all netty related
+system properties. Once properly configured, the server will then supply the
+custom certificate to all incoming requests.
+
+__Note__: Chrome will obviously complain about trust issues until it is trusted
+by a third party. 
+
 ## Options
 
 ```
@@ -74,6 +93,10 @@ OPTIONS
 -j
 --jpeg-camera                        Serves image data via jpeg camera
                                      transport
+
+-k /path/to/ssl.properties
+--key-store /path/to/ssl.properties  To be used with --secured. This is the
+                                     properties file containing netty ssl info.
 
 -n
 --no-connect                         don't serve up connection js (ideal if
