@@ -1,7 +1,7 @@
 # Robot Vision Control
 
 Robot Vision Control (RVC) allows Chrome browsers to control a host machine the
-same way one might would through applications like RDP or VNC.
+same way one would through applications like RDP or VNC.
 
 ## Requirements
 
@@ -9,23 +9,23 @@ same way one might would through applications like RDP or VNC.
 - n8han's [cs][cs] (follow instructions on README)
 
 [java]: http://java.com/en/download/index.jsp
-[cs]: https://github.com/n8han/conscript#README
+[cs]: https://github.com/n8han/conscript#readme
 
 ## Installation
 
 ```
-cs philcali/robot-vision
+> cs philcali/robot-vision
 ```
 
 Test it out with:
 
 ```
-rvc -j -f 100
+> rvc -j -f 100
 ```
 
-Direct your browser to [http://localhost:8080/robot-vision.html][localy]
+Direct your browser to [http://localhost:8080/robot-vision.html][locally]
 
-[localy]: http://localhost:8080/robot-vision.html
+[locally]: http://localhost:8080/robot-vision.html
 
 ## Streaming vs Reloading
 
@@ -34,14 +34,18 @@ way is a client side loop reloading the image. The second is the _jpeg_ camera
 type streaming to the browser, where the server pushes images to clients.
 
 The default behavior is to have javascript reload the scene, but testing showed
-that jpeg camera streams proved to be more fluid. Don't use this method, if
+that jpeg camera streams proved to be more fluid. Don't use this method if
 you know clients browsers don't support it.
 
 ## Using a Chrome Extension
 
 Control communication must be allowed via passing a _key_ to an open web socket
-connection. This means it's possible to not serve the control code (with `-n`),
+connection. This means it's possible to __not__ serve the control code (with `-n`),
 and inject the needed code using a Chrome Extension.
+
+The extension is available at [robot-chrome][vision-ext].
+
+[vision-ext]: https://github.com/philcali/robot-chrome
 
 ## Options
 
@@ -92,13 +96,13 @@ OPTIONS
 ## Known Issues
 
 - Very rarely in testing, I found that keyboard inputs would _stick_. The only
-way to fix this, atm, is to re-run `rvc` with the `-c` or `--clear-keys` flag.
-- Dual monitor support does not currently work.
+way to fix this at the moment, is to re-run `rvc` with the `-c` or `--clear-keys` flag.
+- Dual monitor support does not currently work, but should be easy enough to add. 
 
 ## TODO's
 
-- Popout interface for dynamic controls
-- interface for uploading and dowloading files
+- Popout interface for dynamic controls (mainly controlling scales and quality)
+- interface for uploading and downloading files
 
 ## License
 
