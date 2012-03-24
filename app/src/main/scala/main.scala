@@ -90,19 +90,22 @@ object Main {
       val address = bind.value.getOrElse("0.0.0.0")
 
       val master = password.value.map { pass =>
+        println("[CONFIG] Authed controller")
         ValidUser(user.value.getOrElse(""), pass)
       }
 
       val viewer = participant.value.map { pass =>
+        println("[CONFIG] Authed viewer participants")
         ViewingUser(master, pass)
       }
 
       val pulse = jpegCamera.value.map { _ =>
+        println("[CONFIG] Setting framerate")
         Pulse(frameRate.value.getOrElse(30))
       }
 
       val secret = generateSecret.value.map { _ =>
-        println("Wrote secret to %s" format PrivateKey.file)
+        println("[CONFIG] Wrote secret to %s" format PrivateKey.file)
         PrivateKey.save()
       } getOrElse {
         PrivateKey.retrieve.getOrElse(PrivateKey.generate)
@@ -110,9 +113,10 @@ object Main {
 
       val vision = authed(viewer, pulse.map(_ => ImageStream).getOrElse(Vision))
 
-      val connect = noConnect.value.map(_ =>
+      val connect = noConnect.value.map { _ =>
+        println("[CONFIG] Without control scripts")
         List[ChannelHandler]()
-      ).getOrElse(
+      } getOrElse (
         List(authed(master, Connect(secret)))
       )
 
@@ -121,21 +125,24 @@ object Main {
 
       def buildServer() {
         // Https server requires extra system variables
-        secured.value.map( _ =>
-          handlers.foldLeft(Https(listen, address))(_.handler(_)).run()
+        val s: unfiltered.util.RunnableServer = secured.value.map( _ =>
+          handlers.foldLeft(Https(listen, address))(_.handler(_))
         ) getOrElse {
-          handlers.foldLeft(Http(listen, address))(_.handler(_)).run()
+          handlers.foldLeft(Http(listen, address))(_.handler(_))
         }
+
+        s.run(_ => {
+          pulse.map { p =>
+            println("[CONFIG] Using jpeg stream")
+            ImageService.start(); p.start()
+          }
+          println("[START] Embedded server at %s:%d" format(address, listen))
+        }, _ => {
+          pulse.map(_ => ImageService.stop())
+        })
       }
 
-      pulse.map { p =>
-        ImageService.start()
-        p.start()
-        buildServer()
-        ImageService.stop()
-      } getOrElse {
-        buildServer()
-      }
+      buildServer()
 
     } catch {
       case e: ArgotUsageException => println(e.message)
