@@ -66,7 +66,25 @@ custom certificate to all incoming requests.
 __Note__: Chrome will obviously complain about trust issues until it is trusted
 by a third party. 
 
-## Options
+## Control Library
+
+The `capture-control` library is a wrapper around java utilities used in RVC
+for screen capture image manipulation and remote control.
+
+Feel free to use it in your projects.
+
+`libraryDependencies += "com.github.philcali" %% "capture-control" % "0.0.1"`
+
+## Client Library
+
+The client interface is a submodule shared by this application and the Chrome
+extension.
+
+That code is found at [robot-interface][vision-int].
+
+[vision-int]: https://github.com/philcali/robot-interface
+
+## RVC Options
 
 ```
 Usage: rvc [OPTIONS]
