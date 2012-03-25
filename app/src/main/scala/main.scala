@@ -20,6 +20,28 @@ import server._
 
 import org.clapper.argot._
 
+class Mode(val name: String, val desc: String) {
+  def output() = {
+    val absolute = (0 to (30 - name.length) / 8).map(_ => "\t").mkString
+    println((" %s%s%s").format(name, absolute, desc))
+  }
+
+  def matches(action: String) = name.split(",").map(_.trim).contains(action)
+}
+
+case object Run extends Mode("run, web", "Launches embedded server")
+case object Record extends Mode("record", "Records actions only")
+case object SetProp extends Mode("set, add", "Sets a vision property")
+case object RemoveProp extends Mode("remove, rm", "Removes a vision property")
+case object ListProp extends Mode("list, ls", "Lists vision properties")
+case object Help extends Mode("actions, help", "Displays this list")
+
+object ValidMode {
+  def all = List(Run, Record, SetProp, RemoveProp, ListProp, Help)
+
+  def unapply(action: String) = all.find(_.matches(action))
+}
+
 object Main {
   import ArgotConverters._
 
@@ -81,6 +103,18 @@ object Main {
     (s, opt) => new File(s)
   }
 
+  val action = parser.parameter[Mode]("action", "vision mode", false) {
+    (s, opt) =>
+    s match {
+      case ValidMode(mode) => mode
+      case _ => Help
+    }
+  }
+
+  val extras = parser.multiParameter[String](
+    "extras", "action parameters", true
+  )
+
   def authed(users: Option[Users], plan: async.Plan) =
     users.map(u => async.Planify(Auth(u)(plan.intent))).getOrElse(plan)
 
@@ -95,15 +129,47 @@ object Main {
 
   def readSslProperties(file: File) {
     println("[CONFIG] setting ssl props from %s" format file)
-    val p = new java.util.Properties(System.getProperties)
-    p.load(new java.io.FileInputStream(file))
+    val p = Properties.fromFile(file).load(System.getProperties)
 
-    System.setProperties(p)
+    System.setProperties(p.properties)
+  }
+
+  def handleMode() {
+    action.value.map {
+      case Help =>
+        ValidMode.all.foreach(_.output)
+        throw new ArgotUsageException("Vision commands")
+      case SetProp =>
+        if (extras.value.size >= 2) {
+          val values = extras.value.take(2)
+          Properties.load.set(values(0), values(1)).save()
+        }
+        throw new ArgotUsageException("set values")
+      case RemoveProp =>
+        extras.value.foldLeft(Properties.load)(_.remove(_)).save()
+        throw new ArgotUsageException("removed values")
+      case ListProp =>
+        import scala.io.Source.{fromFile => open}
+        import util.control.Exception.allCatch
+        allCatch.opt(open(Properties.file).getLines)
+          .map(_.foreach(println))
+          .getOrElse(println("No properties"))
+        throw new ArgotUsageException("listing properties")
+      case Record =>
+        println("Press [ENTER] to kill recording")
+        extras.value.headOption
+          .map(capture.control.Record(_))
+          .map { r => r.start(); Console.readLine; r.stop() }
+        throw new ArgotUsageException("Finished recording")
+      case _ => println("[CONFIG] Preparing server")
+    }
   }
 
   def main(args: Array[String]) {
     try {
       parser.parse(args)
+
+      handleMode()
 
       // TODO: remove this
       clear.value.map { _ =>
@@ -130,7 +196,7 @@ object Main {
       }
 
       val secret = generateSecret.value.map { _ =>
-        println("[CONFIG] Wrote secret to %s" format PrivateKey.file)
+        println("[CONFIG] Wrote secret to %s" format Properties.file)
         PrivateKey.save()
       } getOrElse {
         PrivateKey.retrieve.getOrElse(PrivateKey.generate)
@@ -151,9 +217,10 @@ object Main {
       def buildServer() {
         // Https server requires extra system variables
         val s: unfiltered.util.RunnableServer = secured.value.map { _ =>
-          val lKey = Some(new File(PrivateKey.folder, "ssl.prop"))
-
-          keyStoreInfo.value.orElse(lKey).map(propertyChecks).map(readSslProperties)
+          keyStoreInfo.value
+            .orElse(Some(Properties.file))
+            .map(propertyChecks)
+            .map(readSslProperties)
 
           handlers.foldLeft(Https(listen, address))(_.handler(_))
         } getOrElse {

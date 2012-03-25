@@ -31,10 +31,17 @@ html
             span .icon-bar
             span .icon-bar
             span .icon-bar
-          a .brand @href="#" desktop-name
+          a .brand desktop-name
           >.nav-collapse
             ul.nav
-              li a @href="/snapshot.jpg" @target="_blank" "Snapshot"
+              li 
+                a @href="/snapshot.jpg" @target="_blank"
+                  img @src="/img/camera.png" @title="Snapshot"
+              connect-check
+                connect-check-true
+                  li
+                    a .record .play @href="#"
+                      img @src="/img/play.png" @title="Begin Recording"
     >#buffer .viewport
       img #desktop @src="/image/desktop_1.0x1.0_0.2_p.jpg"
     canvas #control @width="{width}" @height="{height}" {

@@ -89,6 +89,7 @@ object CaptureBuild extends Build {
     "capture-app",
     file("app"),
     settings = General.settings ++ Seq(
+      scalacOptions ++= Seq("-deprecation", "-unchecked"),
       libraryDependencies <++= (sbtVersion) { sv => Seq(
         "org.clapper" %% "argot" % "0.3.5",
         "org.scala-tools.sbt" %% "launcher-interface" % sv % "provided"

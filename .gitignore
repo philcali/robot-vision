@@ -3,4 +3,4 @@ project/target
 *.swp
 server/src/main/resources/js
 server/src/main/resources/css
-server/src/main/resources/img
+server/src/main/resources/img/glyph*

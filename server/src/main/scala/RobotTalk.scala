@@ -22,8 +22,20 @@ object KeyDown extends EventParsing("keydown")
 
 object RobotAuth extends EventParsing("auth")
 
+object RobotRecord extends EventParsing("record")
+
 case class RobotTalk(secret: String) extends Plan with CloseOnException {
   @volatile private var controller: Option[Int] = None
+
+  // One per controller
+  private val recorder = setupRecorder
+
+  def setupRecorder() = {
+    val name = "recording_%d" format System.currentTimeMillis
+    val location = new java.io.File(Properties.folder, name)
+
+    Record(location.getAbsolutePath)
+  }
 
   def check(pred: Int => Boolean)(block: => Unit) {
     controller.map(i => if (pred(i)) block) 
@@ -51,23 +63,27 @@ case class RobotTalk(secret: String) extends Plan with CloseOnException {
         case _ if isController(s) => RobotProtect.message(s, msg)
       }
       case Close(s) =>
+        // Prevent runaways
+        if (recorder.isRunning) recorder.stop()
         check(_ == s.channel.getId)(controller = None)
     }
   }
   def pass: Plan.PassHandler = (_.sendUpstream(_)) 
-}
 
-object RobotProtect {
-  def message(s: WebSocket, msg: String) = msg match {
-    case KeyUp(KeyTranslate(keyCode)) =>
-      Robot(_.keyRelease(keyCode))
-    case KeyDown(KeyTranslate(keyCode)) =>
-      Robot(_.keyPress(keyCode))
-    case MouseUp(MouseTranslate(button)) =>
-      Robot(_.mouseRelease(button))
-    case MouseDown(MouseTranslate(button)) =>
-      Robot(_.mousePress(button))
-    case MouseMove(xStr, yStr) =>
-      Robot(_.mouseMove(xStr.toInt, yStr.toInt))
+  object RobotProtect {
+    def message(s: WebSocket, msg: String) = msg match {
+      case RobotRecord(value) =>
+        if (value == "record") recorder.start() else recorder.stop()
+      case KeyUp(KeyTranslate(keyCode)) =>
+        Robot(_.keyRelease(keyCode))
+      case KeyDown(KeyTranslate(keyCode)) =>
+        Robot(_.keyPress(keyCode))
+      case MouseUp(MouseTranslate(button)) =>
+        Robot(_.mouseRelease(button))
+      case MouseDown(MouseTranslate(button)) =>
+        Robot(_.mousePress(button))
+      case MouseMove(xStr, yStr) =>
+        Robot(_.mouseMove(xStr.toInt, yStr.toInt))
+    }
   }
 }

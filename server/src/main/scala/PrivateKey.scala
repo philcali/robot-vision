@@ -12,10 +12,7 @@ import scala.io.Source.{fromFile => open}
 import util.control.Exception.allCatch
 
 object PrivateKey {
-  val folder = new File(System.getProperty("user.home"), ".robot-vision")
-  val file = new File(folder, "vision.sec")
-
-  def retrieve = allCatch opt (open(file).getLines.next)
+  def retrieve = Properties.load.get("vision.sec")
 
   def generate = {
     val random = new java.security.SecureRandom()
@@ -23,15 +20,9 @@ object PrivateKey {
   }
 
   def save() = {
-    if (!folder.exists) {
-      folder.mkdirs()
-    }
-
     val secret = generate
 
-    val writer = new FileWriter(file)
-    writer.write(secret)
-    writer.close()
+    Properties.load.set("vision.sec", secret).save()
 
     secret
   }
