@@ -20,7 +20,7 @@ same way one would through applications like RDP or VNC.
 Test it out with:
 
 ```
-> rvc -j -f 100
+> rvc -j -f 100 web
 ```
 
 Direct your browser to [http://localhost:8080/robot-vision.html][locally]
@@ -58,10 +58,13 @@ requests will __always__ fail until (at least) two system properties are set:
 1. `netty.ssl.keyStore`
 2. `netty.ssl.keyStorePassword`
 
-You can supply a properties file containing this information with `-k ssl.prop`,
-or the program will look at `~/.robot-vision/ssl.prop` for all netty related
-system properties. Once properly configured, the server will then supply the
-custom certificate to all incoming requests.
+
+Supply the properties with `rvc set prop.key prop.value`.
+
+```
+rvc set netty.ssl.keyStore /path/to/cert.jks
+rvc set netty.ssl.keyStorePassword secret
+```
 
 __Note__: Chrome will obviously complain about trust issues until it is trusted
 by a third party. 
