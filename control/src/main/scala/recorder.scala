@@ -9,10 +9,10 @@ import java.io.{
 case class Frame(index: Long)
 case object Quit
 
-case class Record(path: String) extends actors.Actor {
+case class Record(path: String) extends actors.Actor { self =>
   val location = new File(path)
 
-  @volatile private var stopping = false
+  @volatile private var stopping = true 
 
   def writeImage(index: Long, data: Array[Byte]) = {
     val name = "%05d.jpg" format index
@@ -25,18 +25,20 @@ case class Record(path: String) extends actors.Actor {
 
   def act = {
     stopping = false
+
     if (!location.exists) {
       location.mkdirs()
     }
 
-    this ! Frame(0L)
+    self ! Frame(1)
     loopWhile(isRunning()) {
       react {
         case Frame(index) =>
           writeImage(index, Robot.screenshot.withPointer.data(1.0f))
           Thread.sleep(1000 / 50)
-          this ! Frame(index + 1)
-        case Quit => stopping = true
+          self ! Frame(index + 1)
+        case Quit =>
+          stopping = true
       }
     }
   }

@@ -73,7 +73,9 @@ case class RobotTalk(secret: String) extends Plan with CloseOnException {
   object RobotProtect {
     def message(s: WebSocket, msg: String) = msg match {
       case RobotRecord(value) =>
-        if (value == "record") recorder.start() else recorder.stop()
+        if (value == "record" && !recorder.isRunning) {
+          recorder.start()
+        } else recorder.stop()
       case KeyUp(KeyTranslate(keyCode)) =>
         Robot(_.keyRelease(keyCode))
       case KeyDown(KeyTranslate(keyCode)) =>
