@@ -29,12 +29,12 @@ object Robot {
 
   private val robot = new JBot()
 
-  def apply[A](fun: JBot => A): Option[A] = allCatch opt(fun(robot))
-
-  def display = allCatch opt {
+  lazy val display = allCatch opt {
     val src = Toolkit.getDefaultToolkit.getScreenSize
     new Rectangle(src)
   } getOrElse (new Rectangle(800, 600))
+
+  def apply[A](fun: JBot => A): Option[A] = allCatch opt(fun(robot))
 
   def screenshot = Screenshot(this(_.createScreenCapture(display)).get)
 
