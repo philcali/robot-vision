@@ -90,7 +90,7 @@ That code is found at [robot-interface][vision-int].
 ## RVC Options
 
 ```
-Usage: rvc [OPTIONS]
+Usage: rvc [OPTIONS] action extras
 
 OPTIONS
 
@@ -142,11 +142,12 @@ OPTIONS
 - Very rarely in testing, I found that keyboard inputs would _stick_. The only
 way to fix this at the moment, is to re-run `rvc` with the `-c` or `--clear-keys` flag.
 - Dual monitor support does not currently work, but should be easy enough to add. 
+- No way to control the quality or scale from the client
 
 ## TODO's
 
 - Popout interface for dynamic controls (mainly controlling scales and quality)
-- interface for uploading and downloading files
+- interface for uploading and downloading files from browser
 
 ## License
 
