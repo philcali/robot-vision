@@ -6,6 +6,12 @@ import less.Plugin.{
   lessSettings
 }
 
+import sbtjslint.Plugin.{
+  ShortFormatter,
+  LintKeys,
+  lintSettings
+}
+
 object General {
   val settings: Seq[Setting[_]] = Defaults.defaultSettings ++ Seq(
     scalaVersion := "2.9.1",
@@ -64,6 +70,18 @@ object Less {
   ))
 }
 
+object Lint {
+  val settings: Seq[Setting[_]] = lintSettings ++ inConfig(Compile)(Seq(
+    (LintKeys.indent in LintKeys.jslint) := 2,
+    (LintKeys.flags in LintKeys.jslint) := Seq(
+      "undef", "vars", "browser", "on", "anon", "sloppy"
+    ),
+    (LintKeys.formatter in LintKeys.jslint) := ShortFormatter,
+    (sourceDirectory in LintKeys.jslint) <<= (resourceDirectory)(_ / "lib"),
+    (excludeFilter in LintKeys.jslint) := "jquery.js"
+  ))
+}
+
 object CaptureBuild extends Build {
   lazy val root = Project(
     "capture",
@@ -75,14 +93,14 @@ object CaptureBuild extends Build {
     "capture-control",
     file("control"),
     settings = General.settings ++ Seq(
-      crossScalaVersions := Seq("2.8.1", "2.8.2", "2.9.0", "2.9.1")
+      crossScalaVersions := Seq("2.8.1", "2.8.2", "2.9.0", "2.9.1", "2.9.1-1")
     )
   )
 
   lazy val server = Project(
     "capture-server",
     file("server"),
-    settings = Server.settings ++ Less.settings
+    settings = Server.settings ++ Less.settings ++ Lint.settings
   ) dependsOn control
 
   lazy val app = Project(
