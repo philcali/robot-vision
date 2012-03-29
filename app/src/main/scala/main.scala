@@ -88,7 +88,7 @@ object Main {
   )
 
   val frameRate = parser.option[Int](
-    List("f", "framerate"), "framerate 30",
+    List("f", "framerate"), "framerate 30 (1 frame / 30 millis)",
     "If in jpeg camera mode, push image data at specified framerate"
   )
 

@@ -11,7 +11,10 @@ import java.awt.{
   Rectangle
 }
 
-import java.awt.image.BufferedImage
+import java.awt.image.{
+  BufferedImage,
+  ImageObserver
+}
 import javax.imageio.{
   ImageIO,
   ImageWriteParam,
@@ -43,7 +46,13 @@ object Robot {
   } getOrElse((0, 0))
 }
 
-case class Screenshot(image: BufferedImage) {
+object Screenshot {
+  val pointer = ImageIO.read(getClass.getResourceAsStream("/pointer.png"))
+
+  def apply(image: BufferedImage) = new Screenshot(image)
+}
+
+class Screenshot(image: BufferedImage) {
   def prep(x: Double, y: Double) = {
     new BufferedImage(
       (image.getWidth.toDouble * x).toInt,
@@ -60,12 +69,7 @@ case class Screenshot(image: BufferedImage) {
     val (x, y) = Robot.mouse
     val g = result.getGraphics
 
-    g.setColor(Color.WHITE)
-    g.fillOval(x - 5, y - 5, 8, 9)
-
-    g.setColor(Color.BLACK)
-    g.fillOval(x - 4, y -4 , 7, 8)    
-    g.dispose
+    g.drawImage(Screenshot.pointer, x - 6, y - 4, null)
 
     Screenshot(result)
   }
@@ -84,7 +88,14 @@ case class Screenshot(image: BufferedImage) {
 
   def data(quality: Float = 0.2f) = {
     val buffer = new ByteArrayOutputStream()
-    val cache = new MemoryCacheImageOutputStream(buffer)
+
+    output(quality, buffer)
+
+    buffer.toByteArray
+  }
+
+  def output(quality: Float = 2.0f, out: java.io.OutputStream) {
+    val cache = new MemoryCacheImageOutputStream(out)
 
     val writer = ImageIO.getImageWritersByFormatName("jpeg").next
     val param = writer.getDefaultWriteParam()
@@ -96,6 +107,6 @@ case class Screenshot(image: BufferedImage) {
     writer.write(null, new IIOImage(image, null, null), param)
     writer.dispose()
 
-    buffer.toByteArray
+    cache.close()
   }
 }
