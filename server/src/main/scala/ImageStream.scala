@@ -21,9 +21,18 @@ import org.jboss.netty.channel.{
 }
 import org.jboss.netty.buffer.ChannelBuffers
 
+import capture.control.{
+  Robot,
+  ForeverRunning
+}
+
+case class ImageProps(scaleX: Double, scaleY: Double, qual: Float, p: Boolean)
+
 // Code greatly inspired by n8han/shouty
 // https://github.com/n8han/shouty/blob/master/src/main/scala/stream.scala
-object ImageStream extends Interface {
+case class ImageStream(delay: Long) extends Interface with ForeverRunning {
+  @volatile private var settings = ImageProps(1.0, 1.0, 0.2f, true)
+
   val boundary = "desktrotopio"
 
   val MixedReplace =
@@ -48,8 +57,17 @@ object ImageStream extends Interface {
       val ch = req.underlying.event.getChannel
       ch.write(initial).addListener { () =>
         listeners.add(ch)
-        ImageService ! Write
       }
+  }
+
+  def handleIndex(index: Long) {
+    if (!listeners.isEmpty) {
+      val ImageProps(x, y, q, p) = settings
+      val shot = if (p) Robot.screenshot.withPointer else Robot.screenshot
+      val data = if (x == 1.0 && x == y)
+        shot.data(q) else shot.scale(x, y).data(q)
+      write(data)
+    }
   }
 
   // Write complete boundary jpeg data

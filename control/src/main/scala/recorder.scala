@@ -9,38 +9,58 @@ import java.io.{
 case class Frame(index: Long)
 case object Quit
 
-case class Record(path: String) extends actors.Actor { self =>
-  val location = new File(path)
+trait IncrementalRunning extends LongRunning {
+  def nextIndex(index: Long) = index + 1
+}
 
-  @volatile private var stopping = true 
+trait ForeverRunning extends LongRunning {
+  def nextIndex(index: Long) = index
+}
 
-  def writeImage(index: Long)(out: FileOutputStream => Unit) {
-    val name = "%05d.jpg" format index
-    val writer = new FileOutputStream(new File(location, name))
-    out(writer)
-  }
+trait LongRunning extends actors.Actor { self =>
+  val delay: Long
+
+  @volatile protected var stopping = true
+ 
+  def nextIndex(currentIndex: Long): Long
+ 
+  def handleIndex(index: Long)
 
   def isRunning() = !stopping
+
+  def responder: PartialFunction[Any,Unit] = {
+    case Frame(index) =>
+      handleIndex(index)
+      Thread.sleep(delay)
+      self ! Frame(nextIndex(index))
+    case Quit =>
+      stopping = true
+  }
 
   def act = {
     stopping = false
 
-    if (!location.exists) {
-      location.mkdirs()
-    }
-
     self ! Frame(1)
-    loopWhile(isRunning()) {
-      react {
-        case Frame(index) =>
-          writeImage(index)(Robot.screenshot.withPointer.output(1.0f, _))
-          Thread.sleep(1000 / 50)
-          self ! Frame(index + 1)
-        case Quit =>
-          stopping = true
-      }
-    }
+    loopWhile(isRunning()) (react(responder))
   }
 
-  def stop() = this ! Quit
+  def stop() {
+    self ! Quit
+  }
+}
+
+case class Record(path: String) extends IncrementalRunning {
+  val delay = 1000L / 20L
+
+  val location = new File(path)
+
+  def handleIndex(index: Long) {
+    if (!location.exists) {
+      location.mkdirs
+    }
+
+    val name = "%07d.jpg" format index
+    val writer = new FileOutputStream(new File(location, name))
+    Robot.screenshot.withPointer.output(1.0f, writer)
+  }
 }

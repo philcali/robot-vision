@@ -87,8 +87,8 @@ object Main {
     List("j", "jpeg-camera"), "Serves image data via jpeg camera transport"
   )
 
-  val frameRate = parser.option[Int](
-    List("f", "framerate"), "framerate 30 (1 frame / 30 millis)",
+  val frameRate = parser.option[Long](
+    List("f", "framerate"), "framerate 10 (per second)",
     "If in jpeg camera mode, push image data at specified framerate"
   )
 
@@ -190,9 +190,9 @@ object Main {
         ViewingUser(master, pass)
       }
 
-      val pulse = jpegCamera.value.map { _ =>
+      val service = jpegCamera.value.map { _ =>
         println("[CONFIG] Setting framerate")
-        Pulse(frameRate.value.getOrElse(30))
+        ImageStream(1000L / frameRate.value.getOrElse(10L))
       }
 
       val secret = generateSecret.value.map { _ =>
@@ -202,7 +202,7 @@ object Main {
         PrivateKey.retrieve.getOrElse(PrivateKey.generate)
       }
 
-      val vision = authed(viewer, pulse.map(_ => ImageStream).getOrElse(Vision))
+      val vision = authed(viewer, service.getOrElse(Vision))
 
       val connect = noConnect.value.map { _ =>
         println("[CONFIG] Without control scripts")
@@ -228,13 +228,13 @@ object Main {
         }
 
         s.run(_ => {
-          pulse.map { p =>
+          service.map { p =>
             println("[CONFIG] Using jpeg stream")
-            ImageService.start(); p.start()
+            p.start()
           }
           println("[START] Embedded server at %s:%d" format(address, listen))
         }, _ => {
-          pulse.map(_ => ImageService.stop())
+          service.map(_.stop())
         })
       }
 
