@@ -20,7 +20,7 @@ same way one would through applications like RDP or VNC.
 Test it out with:
 
 ```
-> rvc -j -f 100 web
+> rvc -j web
 ```
 
 Direct your browser to [http://localhost:8080/robot-vision.html][locally]
@@ -62,12 +62,45 @@ requests will __always__ fail until (at least) two system properties are set:
 Supply the properties with `rvc set prop.key prop.value`.
 
 ```
-rvc set netty.ssl.keyStore /path/to/cert.jks
-rvc set netty.ssl.keyStorePassword secret
+> rvc set netty.ssl.keyStore /path/to/cert.jks
+> rvc set netty.ssl.keyStorePassword secret
 ```
 
 __Note__: Chrome will obviously complain about trust issues until it is trusted
 by a third party. 
+
+## Screen recording
+
+RVC allows simplistic screen recording by passing in the following arguments
+in the commandline:
+
+```
+> rvc record /temp/path/to/jpgs
+```
+
+__Note__: in `web` mode, the controller will have an option to initiate and stop
+a recording remotely.
+
+This program does not build the movie from the images. Instead, you can use
+your favorite program to do that.
+
+RVC looks at two properties for record:
+
+- `record.command` - This is executed after the recording is finished and
+- `record.dest` - optionally pass in the destination location
+
+RVC will replace three strings in the command:
+
+- `{location}` - the location set by the recorder
+- `{filename}` - the filename of the movie
+- `{dest}` - the directory destination
+
+In Linux, one might use ffmpeg to transform the series of jpeg's to a movie
+like so:
+
+```
+ffmpeg -r 7 -b 128k -i {location}/%07d.jpg {dest}/{filename}.mp4
+```
 
 ## Control Library
 
@@ -100,8 +133,8 @@ OPTIONS
 -c
 --clear-keys                         Clears stuck keyboard inputs.
 
--f framerate 30
---framerate framerate 30             If in jpeg camera mode, push image data at
+-f framerate 10 (per second)
+--framerate framerate 10             If in jpeg camera mode, push image data at
                                      specified framerate
 
 -g
@@ -142,8 +175,8 @@ OPTIONS
 - Very rarely in testing, I found that keyboard inputs would _stick_. The only
 way to fix this at the moment, is to re-run `rvc` with the `-c` or `--clear-keys` flag.
 - Dual monitor support does not currently work, but should be easy enough to add. 
-- Screen capturing can be really slow; plan to multi-thread this process
-- No way to control the quality or scale from the client
+- Screen capturing can be really slow (JVM screencap performance is lousy)
+- No way to control the quality or scale from the client (yet)
 
 ## TODO's
 

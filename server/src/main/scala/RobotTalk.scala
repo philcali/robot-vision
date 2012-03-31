@@ -34,7 +34,7 @@ case class RobotTalk(secret: String) extends Plan with CloseOnException {
     val name = "recording_%d" format System.currentTimeMillis
     val location = new java.io.File(Properties.folder, name)
 
-    Record(location.getAbsolutePath)
+    new Record(location.getAbsolutePath) with PostOperation
   }
 
   def check(pred: Int => Boolean)(block: => Unit) {

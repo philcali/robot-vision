@@ -141,8 +141,8 @@ object Main {
         throw new ArgotUsageException("Vision commands")
       case SetProp =>
         if (extras.value.size >= 2) {
-          val values = extras.value.take(2)
-          Properties.load.set(values(0), values(1)).save()
+          val (Seq(key), rest) = extras.value.splitAt(1)
+          Properties.load.set(key, rest.mkString(" ")).save()
         }
         throw new ArgotUsageException("set values")
       case RemoveProp =>
@@ -158,7 +158,7 @@ object Main {
       case Record =>
         println("Press [ENTER] to kill recording")
         extras.value.headOption
-          .map(capture.control.Record(_))
+          .map(new capture.control.Record(_) with PostOperation)
           .map { r => r.start(); Console.readLine; r.stop() }
         throw new ArgotUsageException("Finished recording")
       case _ => println("[CONFIG] Preparing server")
