@@ -20,7 +20,7 @@ import server._
 
 import org.clapper.argot._
 
-class Mode(val name: String, val desc: String) {
+abstract class Mode(val name: String, val desc: String) {
   def output() = {
     val absolute = (0 to (30 - name.length) / 8).map(_ => "\t").mkString
     println((" %s%s%s").format(name, absolute, desc))
@@ -138,31 +138,102 @@ object Main {
     action.value.map {
       case Help =>
         ValidMode.all.foreach(_.output)
-        throw new ArgotUsageException("Vision commands")
       case SetProp =>
         if (extras.value.size >= 2) {
           val (Seq(key), rest) = extras.value.splitAt(1)
           Properties.load.set(key, rest.mkString(" ")).save()
         }
-        throw new ArgotUsageException("set values")
       case RemoveProp =>
         extras.value.foldLeft(Properties.load)(_.remove(_)).save()
-        throw new ArgotUsageException("removed values")
       case ListProp =>
         import scala.io.Source.{fromFile => open}
         import util.control.Exception.allCatch
         allCatch.opt(open(Properties.file).getLines)
           .map(_.foreach(println))
           .getOrElse(println("No properties"))
-        throw new ArgotUsageException("listing properties")
       case Record =>
         println("Press [ENTER] to kill recording")
         extras.value.headOption
           .map(new capture.control.Record(_) with PostOperation)
           .map { r => r.start(); Console.readLine; r.stop() }
-        throw new ArgotUsageException("Finished recording")
-      case _ => println("[CONFIG] Preparing server")
+      case _ =>
+        handleWeb()
     }
+  }
+
+  def handleWeb() {
+    println("[CONFIG] Preparing server")
+
+    // TODO: remove this
+    clear.value.map { _ =>
+      import control._
+      println("[CONFIG] Clearing all stuck inputs")
+      (1 to 222).map(k => Robot(_.keyRelease(KeyTranslate(k.toString))))
+      (0 to 2).map(i => Robot(_.mouseRelease(MouseTranslate(i.toString))))
+    }
+
+    val listen = port.value.getOrElse(8080)
+    val address = bind.value.getOrElse("0.0.0.0")
+
+    val master = password.value.map { pass =>
+      println("[CONFIG] Authed controller")
+      ValidUser(user.value.getOrElse(""), pass)
+    }
+
+    val viewer = participant.value.map { pass =>
+      println("[CONFIG] Authed viewer participants")
+      ViewingUser(master, pass)
+    }
+
+    val service = jpegCamera.value.map { _ =>
+      println("[CONFIG] Setting framerate")
+      ImageStream(1000L / frameRate.value.getOrElse(10L))
+    }
+
+    val secret = generateSecret.value.map { _ =>
+      println("[CONFIG] Wrote secret to %s" format Properties.file)
+      PrivateKey.save()
+    } getOrElse {
+      PrivateKey.retrieve.getOrElse(PrivateKey.generate)
+    }
+
+    val vision = authed(viewer, service.getOrElse(Vision))
+
+    val connect = noConnect.value.map { _ =>
+      println("[CONFIG] Without control scripts")
+      List[ChannelHandler]()
+    } getOrElse (
+      List(authed(master, Connect(secret)))
+    )
+
+    // Always have RobotTalk and Vision
+    val handlers = List(RobotTalk(secret), vision) ++ connect
+
+    def buildServer() {
+      // Https server requires extra system variables
+      val s: unfiltered.util.RunnableServer = secured.value.map { _ =>
+        keyStoreInfo.value
+          .orElse(Some(Properties.file))
+          .map(propertyChecks)
+          .map(readSslProperties)
+
+        handlers.foldLeft(Https(listen, address))(_.handler(_))
+      } getOrElse {
+        handlers.foldLeft(Http(listen, address))(_.handler(_))
+      }
+
+      s.run(_ => {
+        service.map { p =>
+          println("[CONFIG] Using jpeg stream")
+          p.start()
+        }
+        println("[START] Embedded server at %s:%d" format(address, listen))
+      }, _ => {
+        service.map(_.stop())
+      })
+    }
+
+    buildServer()
   }
 
   def main(args: Array[String]) {
@@ -170,76 +241,6 @@ object Main {
       parser.parse(args)
 
       handleMode()
-
-      // TODO: remove this
-      clear.value.map { _ =>
-        import control._
-        (1 to 222).map(k => Robot(_.keyRelease(KeyTranslate(k.toString))))
-      }
-
-      val listen = port.value.getOrElse(8080)
-      val address = bind.value.getOrElse("0.0.0.0")
-
-      val master = password.value.map { pass =>
-        println("[CONFIG] Authed controller")
-        ValidUser(user.value.getOrElse(""), pass)
-      }
-
-      val viewer = participant.value.map { pass =>
-        println("[CONFIG] Authed viewer participants")
-        ViewingUser(master, pass)
-      }
-
-      val service = jpegCamera.value.map { _ =>
-        println("[CONFIG] Setting framerate")
-        ImageStream(1000L / frameRate.value.getOrElse(10L))
-      }
-
-      val secret = generateSecret.value.map { _ =>
-        println("[CONFIG] Wrote secret to %s" format Properties.file)
-        PrivateKey.save()
-      } getOrElse {
-        PrivateKey.retrieve.getOrElse(PrivateKey.generate)
-      }
-
-      val vision = authed(viewer, service.getOrElse(Vision))
-
-      val connect = noConnect.value.map { _ =>
-        println("[CONFIG] Without control scripts")
-        List[ChannelHandler]()
-      } getOrElse (
-        List(authed(master, Connect(secret)))
-      )
-
-      // Always have RobotTalk and Vision
-      val handlers = List(RobotTalk(secret), vision) ++ connect
-
-      def buildServer() {
-        // Https server requires extra system variables
-        val s: unfiltered.util.RunnableServer = secured.value.map { _ =>
-          keyStoreInfo.value
-            .orElse(Some(Properties.file))
-            .map(propertyChecks)
-            .map(readSslProperties)
-
-          handlers.foldLeft(Https(listen, address))(_.handler(_))
-        } getOrElse {
-          handlers.foldLeft(Http(listen, address))(_.handler(_))
-        }
-
-        s.run(_ => {
-          service.map { p =>
-            println("[CONFIG] Using jpeg stream")
-            p.start()
-          }
-          println("[START] Embedded server at %s:%d" format(address, listen))
-        }, _ => {
-          service.map(_.stop())
-        })
-      }
-
-      buildServer()
-
     } catch {
       case e: ArgotUsageException => println(e.message)
     }
