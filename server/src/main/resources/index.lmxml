@@ -23,6 +23,7 @@ html
       connect-check-true
         js @src="/lib/control.js"
         js @src="/lib/connect.js"
+        js @src="/web-connect.js"
   body
     >.navbar .navbar-fixed-top
       >.navbar-inner
