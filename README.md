@@ -47,8 +47,12 @@ The extension is available at [robot-chrome][vision-ext].
 
 [vision-ext]: https://github.com/philcali/robot-chrome
 
-__Note__: Chrome extension integration requires that the `-g` flag is run at
-least once to generate the 32 character random string for authentication.
+__Note__: Chrome extension integration requires that the `gen` action is run at
+least once to generate the 32 character random string for authentication:
+
+```
+rvc gen
+```
 
 ## SSL Properties
 
@@ -164,12 +168,28 @@ OPTIONS
                                        (leave blank for open)
 ```
 
+## Vision Actions
+
+Actions are meant to be run once, and done. The remote control server is the
+primary action, but below is the output by running `rvc actions`:
+
+```
+ run, web                       Launches embedded server
+ c, clean-keys                  Wipes stuck inputs
+ record                         Records actions only
+ gen, generate-key              Generates a Chrome extension connection key
+ set, add                       Sets a vision property
+ remove, rm                     Removes a vision property
+ list, ls                       Lists vision properties
+ actions, help                  Displays this list
+```
+
 ## Known Issues
 
 - Very rarely in testing, I found that keyboard inputs would _stick_. The only
-way to fix this at the moment, is to re-run `rvc` with the `-c` or `--clear-keys` flag.
+way to fix this at the moment, is to re-run `rvc` with the `c` or `clean-keys` action.
 - Screen capturing can be really slow (JVM screencap performance is lousy)
-- No way to control the quality or scale from the client (TODO item)
+- No way to control the image quality or scale from the client (TODO item)
 
 ## TODO's
 
