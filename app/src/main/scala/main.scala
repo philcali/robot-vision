@@ -35,9 +35,14 @@ case object SetProp extends Mode("set, add", "Sets a vision property")
 case object RemoveProp extends Mode("remove, rm", "Removes a vision property")
 case object ListProp extends Mode("list, ls", "Lists vision properties")
 case object Help extends Mode("actions, help", "Displays this list")
+case object Clear extends Mode("c, clean-keys", "Wipes stuck inputs")
+case object Generate extends Mode(
+  "gen, generate-key",
+  "Generates a Chrome extension connection key"
+)
 
 object ValidMode {
-  def all = List(Run, Record, SetProp, RemoveProp, ListProp, Help)
+  def all = List(Run, Clear, Record, Generate, SetProp, RemoveProp, ListProp, Help)
 
   def unapply(action: String) = all.find(_.matches(action))
 }
@@ -79,10 +84,6 @@ object Main {
     "separate password for the 'viewer' user (leave blank for open)"
   )
 
-  val generateSecret = parser.flag[Boolean](
-    List("g", "gen-secret"), "generate a secret key to be passed to socket program"
-  )
-
   val jpegCamera = parser.flag[Boolean](
     List("j", "jpeg-camera"), "Serves image data via jpeg camera transport"
   )
@@ -90,10 +91,6 @@ object Main {
   val frameRate = parser.option[Long](
     List("f", "framerate"), "framerate 10 (per second)",
     "If in jpeg camera mode, push image data at specified framerate"
-  )
-
-  val clear = parser.flag[Boolean](
-    List("c", "clear-keys"), "Clears stuck keyboard inputs."
   )
 
   val keyStoreInfo = parser.option[java.io.File](
@@ -138,6 +135,14 @@ object Main {
     action.value.map {
       case Help =>
         ValidMode.all.foreach(_.output)
+      case Clear =>
+        import control._
+        println("[INFO] Clearing all stuck inputs")
+        (1 to 222).map(k => Robot(_.keyRelease(KeyTranslate(k.toString))))
+        (0 to 2).map(i => Robot(_.mouseRelease(MouseTranslate(i.toString))))
+      case Generate =>
+        println("[SUCCESS] Wrote secret to %s" format Properties.file)
+        println("[SUCCESS] Chrome key: %s" format PrivateKey.save())
       case SetProp =>
         if (extras.value.size >= 2) {
           val (Seq(key), rest) = extras.value.splitAt(1)
@@ -164,14 +169,6 @@ object Main {
   def handleWeb() {
     println("[CONFIG] Preparing server")
 
-    // TODO: remove this
-    clear.value.map { _ =>
-      import control._
-      println("[CONFIG] Clearing all stuck inputs")
-      (1 to 222).map(k => Robot(_.keyRelease(KeyTranslate(k.toString))))
-      (0 to 2).map(i => Robot(_.mouseRelease(MouseTranslate(i.toString))))
-    }
-
     val listen = port.value.getOrElse(8080)
     val address = bind.value.getOrElse("0.0.0.0")
 
@@ -190,12 +187,7 @@ object Main {
       ImageStream(1000L / frameRate.value.getOrElse(10L))
     }
 
-    val secret = generateSecret.value.map { _ =>
-      println("[CONFIG] Wrote secret to %s" format Properties.file)
-      PrivateKey.save()
-    } getOrElse {
-      PrivateKey.retrieve.getOrElse(PrivateKey.generate)
-    }
+    val secret = PrivateKey.retrieve.getOrElse(PrivateKey.generate)
 
     val vision = authed(viewer, service.getOrElse(Vision))
 
