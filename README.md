@@ -128,46 +128,40 @@ Usage: rvc [OPTIONS] action extras
 OPTIONS
 
 -b (0.0.0.0)
---bind-address (0.0.0.0)             bind address
-
--c
---clear-keys                         Clears stuck keyboard inputs.
+--bind-address (0.0.0.0)               bind address
 
 -f framerate 10 (per second)
---framerate framerate 10             If in jpeg camera mode, push image data at
-                                     specified framerate
-
--g
---gen-secret                         generate a secret key to be passed to
-                                     socket program
+--framerate framerate 10 (per second)  If in jpeg camera mode, push image data
+                                       at specified framerate
 
 -i 8080
---inet-port 8080                     internet port
+--inet-port 8080                       internet port
 
 -j
---jpeg-camera                        Serves image data via jpeg camera
-                                     transport
+--jpeg-camera                          Serves image data via jpeg camera
+                                       transport
 
 -k /path/to/ssl.properties
---key-store /path/to/ssl.properties  To be used with --secured. This is the
-                                     properties file containing netty ssl info.
+--key-store /path/to/ssl.properties    To be used with --secured. This is the
+                                       properties file containing netty ssl
+                                       info.
 
 -n
---no-connect                         don't serve up connection js (ideal if
-                                     using Chrome extension to connect)
+--no-connect                           don't serve up connection js (ideal if
+                                       using Chrome extension to connect)
 
 -p <none>
---password <none>                    password to auth
+--password <none>                      password to auth
 
 -s
---secured                            https server (http)
+--secured                              https server (http)
 
 -u <none>
---user <none>                        user to auth
+--user <none>                          user to auth
 
 -v <viewer password>
---viewer-password <viewer password>  separate password for the 'viewer' user
-                                     (leave blank for open)
+--viewer-password <viewer password>    separate password for the 'viewer' user
+                                       (leave blank for open)
 ```
 
 ## Known Issues
@@ -175,7 +169,7 @@ OPTIONS
 - Very rarely in testing, I found that keyboard inputs would _stick_. The only
 way to fix this at the moment, is to re-run `rvc` with the `-c` or `--clear-keys` flag.
 - Screen capturing can be really slow (JVM screencap performance is lousy)
-- No way to control the quality or scale from the client (yet)
+- No way to control the quality or scale from the client (TODO item)
 
 ## TODO's
 
