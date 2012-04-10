@@ -6,9 +6,14 @@ import util.control.Exception.allCatch
 
 // Java
 import java.io.ByteArrayOutputStream
+
 import java.awt.{
+  Color,
   Toolkit,
-  Rectangle
+  MouseInfo,
+  Rectangle,
+  Robot => JBot,
+  GraphicsEnvironment => GE
 }
 
 import java.awt.image.{
@@ -24,17 +29,17 @@ import javax.imageio.{
 import java.awt.geom.AffineTransform
 import java.awt.image.AffineTransformOp
 import javax.imageio.stream.MemoryCacheImageOutputStream
-import java.awt.MouseInfo
-import java.awt.Color
 
 object Robot {
-  import java.awt.{ Robot => JBot }
-
   private val robot = new JBot()
 
+  private val screens = GE.getLocalGraphicsEnvironment.getScreenDevices()
+
   lazy val display = allCatch opt {
-    val src = Toolkit.getDefaultToolkit.getScreenSize
-    new Rectangle(src)
+    screens.foldLeft(new Rectangle) { (in, screen) => 
+      val bounds = screen.getDefaultConfiguration.getBounds()
+      new Rectangle(in.width + bounds.width, math.max(in.height, bounds.height))
+    }
   } getOrElse (new Rectangle(800, 600))
 
   def apply[A](fun: JBot => A): Option[A] = allCatch opt(fun(robot))

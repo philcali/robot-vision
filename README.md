@@ -174,7 +174,6 @@ OPTIONS
 
 - Very rarely in testing, I found that keyboard inputs would _stick_. The only
 way to fix this at the moment, is to re-run `rvc` with the `-c` or `--clear-keys` flag.
-- Dual monitor support does not currently work, but should be easy enough to add. 
 - Screen capturing can be really slow (JVM screencap performance is lousy)
 - No way to control the quality or scale from the client (yet)
 
