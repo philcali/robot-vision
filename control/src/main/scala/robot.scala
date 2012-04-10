@@ -16,6 +16,11 @@ import java.awt.{
   GraphicsEnvironment => GE
 }
 
+import java.awt.datatransfer.{
+  DataFlavor,
+  StringSelection
+}
+
 import java.awt.image.{
   BufferedImage,
   ImageObserver
@@ -29,6 +34,19 @@ import javax.imageio.{
 import java.awt.geom.AffineTransform
 import java.awt.image.AffineTransformOp
 import javax.imageio.stream.MemoryCacheImageOutputStream
+
+object Clipboard {
+  lazy val system = Toolkit.getDefaultToolkit.getSystemClipboard
+
+  def apply(text: String) = allCatch opt {
+    system.setContents(new StringSelection(text), null)
+  }
+
+  def retrieve =
+    allCatch opt (system.getContents(None)) filter(_ != null) map { contents =>
+      contents.getTransferData(DataFlavor.stringFlavor).toString
+    }
+}
 
 object Robot {
   private val robot = new JBot()
