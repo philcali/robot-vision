@@ -1,0 +1,16 @@
+## RVC Application
+
+Initial beta release of Robot Vision Control (RVC).
+
+- Install with `cs philcali/robot-vision`
+- Launch web server with `rvc web`
+
+## Control Library
+
+The `capture-control` library is available for 2.8.x and 2.9.x versions of
+Scala. The library contains Scala wrappers for controlling a host, used in RVC.
+
+## Control Server
+
+The `capture-server` is server package for 2.8.x and 2.9.x versions of Scala.
+This package contains the embedded server logic used in RVC. 
