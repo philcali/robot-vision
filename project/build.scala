@@ -16,7 +16,38 @@ object General {
   val settings: Seq[Setting[_]] = Defaults.defaultSettings ++ Seq(
     scalaVersion := "2.9.1",
     version := "0.0.1",
-    organization := "com.github.philcali"
+    organization := "com.github.philcali",
+    publishTo <<= version { v =>
+      val nexus = "https://oss.sonatype.org/"
+      if (v.trim.endsWith("SNAPSHOT"))
+        Some("snapshots" at nexus + "content/repositories/snapshots")
+      else
+        Some("releases" at nexus + "service/local/staging/deploy/maven2")
+    },
+    publishMavenStyle := true,
+    publishArtifact in Test := false,
+    pomIncludeRepository := { x => false },
+    pomExtra := (
+      <url>https://github.com/philcali/robot-vision</url>
+      <licenses>
+        <license>
+          <name>The MIT License</name>
+          <url>http://www.opensource.org/licenses/mit-license.php</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
+      <scm>
+        <url>git@github.com:philcali/robot-vision.git</url>
+        <connection>scm:git:git@github.com:philcali/robot-vision.git</connection>
+      </scm>
+      <developers>
+        <developer>
+          <id>philcali</id>
+          <name>Philip Cali</name>
+          <url>http://philcalicode.blogspot.com/</url>
+        </developer>
+      </developers>
+    )
   )
 }
 
@@ -24,10 +55,9 @@ object Server {
   val unfilteredVersion = SettingKey[String]("unfiltered-version")
 
   val settings: Seq[Setting[_]] = General.settings ++ Seq(
-    unfilteredVersion := "0.6.0",
+    unfilteredVersion := "0.6.1",
     libraryDependencies <++= (unfilteredVersion) { uv => Seq(
       "com.github.philcali" %% "lmxml-html" % "0.1.1",
-      "com.github.philcali" %% "lmxml-json" % "0.1.1",
       "net.databinder" %% "unfiltered-filter" % uv,
       "net.databinder" %% "unfiltered-netty-server" % uv,
       "net.databinder" %% "unfiltered-netty-websockets" % uv
@@ -110,7 +140,7 @@ object CaptureBuild extends Build {
     settings = General.settings ++ Seq(
       scalacOptions ++= Seq("-deprecation", "-unchecked"),
       libraryDependencies <++= (sbtVersion) { sv => Seq(
-        "org.clapper" %% "argot" % "0.3.5",
+        "org.clapper" %% "argot" % "0.3.6",
         "org.scala-tools.sbt" %% "launcher-interface" % sv % "provided"
       ) }
     )
