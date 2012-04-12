@@ -74,7 +74,7 @@ object Lint {
   val settings: Seq[Setting[_]] = lintSettings ++ inConfig(Compile)(Seq(
     (LintKeys.indent in LintKeys.jslint) := 2,
     (LintKeys.flags in LintKeys.jslint) := Seq(
-      "undef", "vars", "browser", "on", "anon", "sloppy"
+      "undef", "browser", "on", "anon", "sloppy"
     ),
     (LintKeys.formatter in LintKeys.jslint) := ShortFormatter,
     (sourceDirectory in LintKeys.jslint) <<= (resourceDirectory)(_ / "lib"),
