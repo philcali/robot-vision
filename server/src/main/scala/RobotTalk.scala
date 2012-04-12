@@ -65,6 +65,8 @@ case class RobotTalk(secret: String) extends Plan with CloseOnException {
       case Close(s) =>
         // Prevent runaways
         if (recorder.isRunning) recorder.stop()
+        // Safely clear inputs on disconnect
+        Robot.clearInputs()
         check(_ == s.channel.getId)(controller = None)
     }
   }

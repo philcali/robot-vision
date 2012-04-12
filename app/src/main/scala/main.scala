@@ -136,10 +136,8 @@ object Main {
       case Help =>
         ValidMode.all.foreach(_.output)
       case Clear =>
-        import control._
         println("[INFO] Clearing all stuck inputs")
-        (1 to 222).map(k => Robot(_.keyRelease(KeyTranslate(k.toString))))
-        (0 to 2).map(i => Robot(_.mouseRelease(MouseTranslate(i.toString))))
+        control.Robot.clearInputs()
       case Generate =>
         println("[SUCCESS] Wrote secret to %s" format Properties.file)
         println("[SUCCESS] Chrome key: %s" format PrivateKey.save())

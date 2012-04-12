@@ -48,6 +48,7 @@ object Clipboard {
     }
 }
 
+// TODO: rethink possibility of having independent coordinate systems
 object Robot {
   private val robot = new JBot()
 
@@ -67,6 +68,11 @@ object Robot {
   def mouse = allCatch opt(MouseInfo.getPointerInfo) map { info =>
     (info.getLocation.x, info.getLocation.y)
   } getOrElse((0, 0))
+
+  def clearInputs() {
+    (1 to 222).map(k => apply(_.keyRelease(KeyTranslate(k.toString))))
+    (0 to 2).map(i => apply(_.mouseRelease(MouseTranslate(i.toString))))
+  }
 }
 
 object Screenshot {
