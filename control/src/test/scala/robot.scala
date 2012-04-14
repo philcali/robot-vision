@@ -27,7 +27,7 @@ class RobotTest extends FlatSpec with ShouldMatchers {
     val recorder = new Record(folderName) with Reporter
 
     recorder.start()
-    Thread.sleep(1000 * 60)
+    Thread.sleep(1000)
     recorder.stop()
     println("TIME!")
 
