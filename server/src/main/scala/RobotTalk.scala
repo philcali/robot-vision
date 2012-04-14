@@ -25,7 +25,7 @@ object RobotAuth extends EventParsing("auth")
 object RobotRecord extends EventParsing("record")
 
 case class RobotTalk(secret: String) extends Plan with CloseOnException {
-  @volatile private var controller: Option[Int] = None
+  @volatile private var controller: Option[java.lang.Integer] = None
 
   // One per controller
   private val recorder = setupRecorder
@@ -37,7 +37,7 @@ case class RobotTalk(secret: String) extends Plan with CloseOnException {
     new Record(location.getAbsolutePath) with PostOperation
   }
 
-  def check(pred: Int => Boolean)(block: => Unit) {
+  def check(pred: java.lang.Integer => Boolean)(block: => Unit) {
     controller.map(i => if (pred(i)) block) 
   }
 
