@@ -14,7 +14,7 @@ import sbtjslint.Plugin.{
 
 object General {
   val crossVersions = Seq(
-    "2.8.1", "2.8.2", "2.9.0", "2.9.0-1", "2.9.1", "2.9.1-1"
+    "2.8.1", "2.8.2", "2.9.0", "2.9.0-1", "2.9.1"
   )
 
   val settings: Seq[Setting[_]] = Defaults.defaultSettings ++ Seq(
