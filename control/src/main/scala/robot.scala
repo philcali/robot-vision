@@ -63,7 +63,7 @@ object Robot {
 
   def apply[A](fun: JBot => A): Option[A] = allCatch opt(fun(robot))
 
-  def screenshot = Screenshot(this(_.createScreenCapture(display)).get)
+  def screenshot = Screenshot(robot.createScreenCapture(display))
 
   def mouse = allCatch opt(MouseInfo.getPointerInfo) map { info =>
     (info.getLocation.x, info.getLocation.y)
