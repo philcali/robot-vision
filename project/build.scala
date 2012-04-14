@@ -13,6 +13,10 @@ import sbtjslint.Plugin.{
 }
 
 object General {
+  val crossVersions = Seq(
+    "2.8.1", "2.8.2", "2.9.0", "2.9.0-1", "2.9.1", "2.9.1-1"
+  )
+
   val settings: Seq[Setting[_]] = Defaults.defaultSettings ++ Seq(
     scalaVersion := "2.9.1",
     version := "0.0.1",
@@ -56,6 +60,7 @@ object Server {
 
   val settings: Seq[Setting[_]] = General.settings ++ Seq(
     unfilteredVersion := "0.6.1",
+    crossScalaVersions := General.crossVersions,
     libraryDependencies <++= (unfilteredVersion) { uv => Seq(
       "com.github.philcali" %% "lmxml-html" % "0.1.1",
       "net.databinder" %% "unfiltered-filter" % uv,
@@ -123,8 +128,8 @@ object CaptureBuild extends Build {
     "capture-control",
     file("control"),
     settings = General.settings ++ Seq(
-      crossScalaVersions := Seq("2.8.1", "2.8.2", "2.9.0", "2.9.1", "2.9.1-1"),
-      libraryDependencies += "org.scalatest" %% "scalatest" % "1.7.1"
+      crossScalaVersions := General.crossVersions,
+      libraryDependencies += "org.scalatest" %% "scalatest" % "1.7.1" % "test"
     )
   )
 

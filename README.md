@@ -27,6 +27,23 @@ Direct your browser to [http://localhost:8080/robot-vision.html][locally]
 
 [locally]: http://localhost:8080/robot-vision.html
 
+## Controlling and Viewing
+
+RVC was made with the idea of sharing the desktop. Only one person can control
+the desktop, while others watch.
+
+- `desktop.html` to control the desktop
+- `robot-vision.html` read only view of the desktop
+
+If you want to wrap the control scripts around basic auth, then pass in
+a username and password via `rvc -u user -p password web`.
+
+If you want to wrap the viewers in basic auth, use `rvc -v password web`. The
+username for `robot-vision.html` authentication will always be `viewer`.
+
+Keep in mind, this is plain text auth over http. Read below about using ssl
+secured auth over https.
+
 ## Streaming vs Reloading
 
 RVC allows for two specific forms of _reloading_ the desktop image. The first
@@ -61,7 +78,6 @@ requests will __always__ fail until (at least) two system properties are set:
 
 1. `netty.ssl.keyStore`
 2. `netty.ssl.keyStorePassword`
-
 
 Supply the properties with `rvc set prop.key prop.value`.
 
