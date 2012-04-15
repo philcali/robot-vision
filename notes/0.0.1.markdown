@@ -4,6 +4,9 @@ Initial beta release of Robot Vision Control (RVC).
 
 - Install with `cs philcali/robot-vision`
 - Launch web server with `rvc web`
+- Launch associated Chrome [extension][1]
+
+[1]: https://chrome.google.com/webstore/detail/ieabafligicoomhcodhiolhlmljhmifi?utm_source=chrome-ntp-icon
 
 ## Control Library
 
