@@ -99,7 +99,10 @@ in the commandline:
 ```
 
 __Note__: in `web` mode, the controller will have an option to initiate and stop
-a recording remotely.
+a recording remotely. Currently, remote recordings are stored in:
+```
+{USER-HOME}/.robot_vision/recording_{timestamp}
+```
 
 This program does not build the movie from the images. Instead, you can use
 your favorite program to do that.
