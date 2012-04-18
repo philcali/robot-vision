@@ -19,7 +19,7 @@ object General {
 
   val settings: Seq[Setting[_]] = Defaults.defaultSettings ++ Seq(
     scalaVersion := "2.9.1",
-    version := "0.0.1",
+    version := "0.0.2",
     organization := "com.github.philcali",
     publishTo <<= version { v =>
       val nexus = "https://oss.sonatype.org/"
@@ -111,7 +111,8 @@ object Lint {
     (LintKeys.flags in LintKeys.jslint) := Seq(
       "undef", "browser", "on", "anon", "sloppy"
     ),
-    (LintKeys.formatter in LintKeys.jslint) := ShortFormatter,
+    (LintKeys.formatter in LintKeys.jslintConsoleOutput) := ShortFormatter,
+    (LintKeys.outputs in LintKeys.jslint) ~= (_.take(1)),
     (sourceDirectory in LintKeys.jslint) <<= (resourceDirectory)(_ / "lib"),
     (excludeFilter in LintKeys.jslint) := "jquery.js"
   ))
