@@ -63,8 +63,7 @@ object Server {
     crossScalaVersions := General.crossVersions,
     libraryDependencies <++= (unfilteredVersion) { uv => Seq(
       "com.github.philcali" %% "lmxml-html" % "0.1.1",
-      "net.databinder" %% "unfiltered-filter" % uv,
-      "net.databinder" %% "unfiltered-netty-server" % uv,
+      "net.databinder" %% "unfiltered" % uv,
       "net.databinder" %% "unfiltered-netty-websockets" % uv
     ) }
   )

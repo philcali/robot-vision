@@ -63,7 +63,7 @@ object Robot {
 }
 
 object Screenshot {
-  val pointer = ImageIO.read(getClass.getResourceAsStream("/pointer.png"))
+  lazy val pointer = ImageIO.read(getClass.getResourceAsStream("/pointer.png"))
 
   def apply(image: BufferedImage) = new Screenshot(image)
 }

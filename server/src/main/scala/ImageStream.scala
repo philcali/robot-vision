@@ -45,7 +45,7 @@ case class ImageStream(delay: Long) extends Interface with ForeverRunning {
     ContentType("text/javascript") ~>
     ResponseString("")
 
-  val listeners = new DefaultChannelGroup
+  val listeners = new DefaultChannelGroup("Image Streams")
 
   def preload = {
     // Imagine this file will actually be different

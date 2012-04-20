@@ -128,6 +128,12 @@ object Main {
     println("[CONFIG] setting ssl props from %s" format file)
     val p = Properties.fromFile(file).load(System.getProperties)
 
+    val check = (name: String) =>
+      if (p.get(name).isEmpty)
+        throw new ArgotUsageException("[ERROR]: %s undefined" format name)
+
+    Seq("netty.ssl.keyStore", "netty.ssl.keyStorePassword").map(check)
+
     System.setProperties(p.properties)
   }
 
