@@ -25,6 +25,7 @@ trait PostOperation extends LongRunning { self: Record =>
     }
 
     pump(new BufferedReader(new InputStreamReader(process.getInputStream)))
+    process.waitFor
   }
 
   override def stop() {
@@ -34,6 +35,7 @@ trait PostOperation extends LongRunning { self: Record =>
 
     val props = Properties.load
     val dest = props.get("record.dest").getOrElse("""\.""")
+    val delete = props.get("record.cleanup").filter(_.trim == "on")
 
     try {
       props.get("record.command")
@@ -46,7 +48,14 @@ trait PostOperation extends LongRunning { self: Record =>
           .map(pb.command(_: _*))
           .map(_.start())
           .map(output)
-        )
+        ).map(_ => delete.map { _ =>
+          println("[CONFIG] Cleaning up %s" format location.getAbsolutePath)
+          location
+            .listFiles
+            .filter(f => Valid.findFirstIn(f.getName).isDefined)
+            .foreach(_.delete)
+          location.delete
+        })
     } catch {
       case e => println("[ERROR]: Post process - %s" format e.getMessage)
     }

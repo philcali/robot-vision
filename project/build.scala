@@ -111,7 +111,6 @@ object Lint {
     (LintKeys.flags in LintKeys.jslint) := Seq(
       "undef", "browser", "on", "anon", "sloppy"
     ),
-    (LintKeys.formatter in LintKeys.jslintConsoleOutput) := ShortFormatter,
     (LintKeys.outputs in LintKeys.jslint) ~= (_.take(1)),
     (sourceDirectory in LintKeys.jslint) <<= (resourceDirectory)(_ / "lib"),
     (excludeFilter in LintKeys.jslint) := "jquery.js"

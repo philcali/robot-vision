@@ -54,6 +54,8 @@ case class Record(path: String) extends IncrementalRunning {
 
   val location = new File(path)
 
+  val Valid = """\d{7}\.jpg""".r
+
   def handleIndex(index: Long) {
     if (!location.exists) {
       location.mkdirs

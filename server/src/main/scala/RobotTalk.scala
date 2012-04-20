@@ -28,11 +28,11 @@ case class RobotTalk(secret: String) extends Plan with CloseOnException {
   @volatile private var controller: Option[java.lang.Integer] = None
 
   // One per controller
-  private val recorder = setupRecorder
+  private var recorder = setupRecorder
 
   def setupRecorder() = {
     val name = "recording_%d" format System.currentTimeMillis
-    val location = new java.io.File(Properties.folder, name)
+    val location = new java.io.File(System.getProperty("user.home"), name)
 
     new Record(location.getAbsolutePath) with PostOperation
   }
@@ -56,9 +56,9 @@ case class RobotTalk(secret: String) extends Plan with CloseOnException {
         case RobotAuth(key) if controller.isEmpty =>
           if (key == secret) {
             controller = Some(s.channel.getId)
-            s.send("connect")
+            s.send("auth|connect")
           } else {
-            s.send("bad key - %s" format key)
+            s.send("bad-key| - %s" format key)
           }
         case _ if isController(s) => RobotProtect.message(s, msg)
       }
@@ -74,10 +74,17 @@ case class RobotTalk(secret: String) extends Plan with CloseOnException {
 
   object RobotProtect {
     def message(s: WebSocket, msg: String) = msg match {
-      case RobotRecord(value) =>
-        if (value == "record" && !recorder.isRunning) {
-          recorder.start()
-        } else recorder.stop()
+      case RobotRecord(value) => value match {
+          case "record" if !recorder.isRunning =>
+            recorder.start()
+            s.send("record|started")
+          case "stop" if recorder.isRunning =>
+            recorder.stop()
+            recorder = setupRecorder()
+            s.send("record|stopped")
+          case _ if recorder.isRunning => s.send("record|started")
+          case _ => s.send("record|stopped")
+        }
       case KeyUp(KeyTranslate(keyCode)) =>
         Robot(_.keyRelease(keyCode))
       case KeyDown(KeyTranslate(keyCode)) =>
