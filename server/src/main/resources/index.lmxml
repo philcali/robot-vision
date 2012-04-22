@@ -16,6 +16,7 @@ html
         ```
     js @src="/lib/jquery.js"
     js @src="/bootstrap-collapse.js"
+    js @src="/bootstrap-modal.js"
     js @src="/lib/desktop.js"
     js @src="/lib/viewport.js"
     js @src="/interface.js"
@@ -43,6 +44,14 @@ html
     canvas #control @width="{width}" @height="{height}" {
       style: "z-index: 1; position: absolute; top: 40px; left: 0px;"
     }
+    >#clipboard-modal .modal .hide
+      >.modal-header
+        a.close @data-dismiss="modal" "x"
+        h3 "Robot Clipboard"
+      >.modal-body
+        textarea #clipboard-contents .input-xlarge @rows="10"
+      >.modal-footer
+        a#clipboard-send .btn .btn-primary "Set clipboard"
     connect-check
       connect-check-true
         >#robot-key @style="display: none;" "{robot-key}"
