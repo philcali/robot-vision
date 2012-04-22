@@ -55,9 +55,9 @@ case class ImageStream(delay: Long) extends Interface with ForeverRunning {
       // TODO: What about the controller changing service settings?
       val initial = req.underlying.defaultResponse(MixedReplace)
       val ch = req.underlying.event.getChannel
-      ch.write(initial).addListener { () =>
-        listeners.add(ch)
-      }
+      val future = ch.write(initial)
+      future.addListener(() => listeners.add(ch))
+      future.addListener(ChannelFutureListener.CLOSE_ON_FAILURE)
   }
 
   def handleIndex(index: Long) {
