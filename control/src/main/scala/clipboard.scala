@@ -19,7 +19,8 @@ object Clipboard {
   }
 
   def retrieve =
-    allCatch opt (system.getContents(None)) filter(_ != null) map { contents =>
-      contents.getTransferData(DataFlavor.stringFlavor).toString
-    }
+    allCatch.opt(system.getContents(None))
+      .filter(_ != null)
+      .filter(_.isDataFlavorSupported(DataFlavor.stringFlavor))
+      .map(_.getTransferData(DataFlavor.stringFlavor).toString)
 }
