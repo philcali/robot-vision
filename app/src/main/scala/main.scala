@@ -1,53 +1,13 @@
 package capture
 package app
 
-import unfiltered.netty.{
-  Http,
-  Https
-}
-import unfiltered.netty.async
-import unfiltered.netty.cycle.{
-  Plan,
-  Planify
-}
-
-import unfiltered.request._
-import unfiltered.response._
-import org.jboss.netty.channel.ChannelHandler
 import java.io.File
-
-import server._
 
 import org.clapper.argot._
 
-abstract class Mode(val name: String, val desc: String) {
-  def output() = {
-    val absolute = (0 to (30 - name.length) / 8).map(_ => "\t").mkString
-    println((" %s%s%s").format(name, absolute, desc))
-  }
+import server._
 
-  def matches(action: String) = name.split(",").map(_.trim).contains(action)
-}
-
-case object Run extends Mode("run, web", "Launches embedded server")
-case object Record extends Mode("record", "Records actions only")
-case object SetProp extends Mode("set, add", "Sets a vision property")
-case object RemoveProp extends Mode("remove, rm", "Removes a vision property")
-case object ListProp extends Mode("list, ls", "Lists vision properties")
-case object Help extends Mode("actions, help", "Displays this list")
-case object Clear extends Mode("c, clean-keys", "Wipes stuck inputs")
-case object Generate extends Mode(
-  "gen, generate-key",
-  "Generates a Chrome extension connection key"
-)
-
-object ValidMode {
-  def all = List(Run, Clear, Record, Generate, SetProp, RemoveProp, ListProp, Help)
-
-  def unapply(action: String) = all.find(_.matches(action))
-}
-
-object Main {
+object RvcApp {
   import ArgotConverters._
 
   val preUsage = "Robot Vision Control: Version 0.1 Copyright(c) 2012, Philip M. Cali"
@@ -112,133 +72,78 @@ object Main {
     "extras", "action parameters", true
   )
 
-  def authed(users: Option[Users], plan: async.Plan) =
-    users.map(u => async.Planify(Auth(u)(plan.intent))).getOrElse(plan)
-
-  def propertyChecks(file: File) = {
-    if (!file.exists) {
-      throw new ArgotUsageException("%s does not exists." format file)
-    } else if (file.isDirectory) {
-      throw new ArgotUsageException("%s is a directory." format file)
-    }
-    file
+  def debug[A](msg: String)(contents: A) = {
+    println("[CONFIG] %s" format msg)
+    contents
   }
 
-  def readSslProperties(file: File) {
-    println("[CONFIG] setting ssl props from %s" format file)
-    val p = Properties.fromFile(file).load(System.getProperties)
-
-    val check = (name: String) =>
-      if (p.get(name).isEmpty)
-        throw new ArgotUsageException("[ERROR]: %s undefined" format name)
-
-    Seq("netty.ssl.keyStore", "netty.ssl.keyStorePassword").map(check)
-
-    System.setProperties(p.properties)
-  }
-
-  def handleMode() {
-    action.value.map {
-      case Help =>
-        ValidMode.all.foreach(_.output)
-      case Clear =>
-        println("[INFO] Clearing all stuck inputs")
-        control.Robot.clearInputs()
-      case Generate =>
-        println("[SUCCESS] Wrote secret to %s" format Properties.file)
-        println("[SUCCESS] Chrome key: %s" format PrivateKey.save())
-      case SetProp =>
-        if (extras.value.size >= 2) {
-          val (Seq(key), rest) = extras.value.splitAt(1)
-          Properties.load.set(key, rest.mkString(" ")).save()
-        }
-      case RemoveProp =>
-        extras.value.foldLeft(Properties.load)(_.remove(_)).save()
-      case ListProp =>
-        import scala.io.Source.{fromFile => open}
-        import util.control.Exception.allCatch
-        allCatch.opt(open(Properties.file).getLines)
-          .map(_.foreach(println))
-          .getOrElse(println("No properties"))
-      case Record =>
-        println("Press [ENTER] to kill recording")
-        extras.value.headOption
-          .map(new capture.control.Record(_) with PostOperation)
-          .map { r => r.start(); Console.readLine; r.stop() }
-      case _ =>
-        handleWeb()
-    }
+  def handleMode(mode: Mode): Unit = mode match {
+    case Help =>
+      ValidMode.all.foreach(_.output)
+    case Clear =>
+      println("[INFO] Clearing all stuck inputs")
+      control.Robot.clearInputs()
+    case Generate =>
+      println("[SUCCESS] Wrote secret to %s" format Properties.file)
+      println("[SUCCESS] Chrome key: %s" format PrivateKey.save())
+    case SetProp =>
+      if (extras.value.size >= 2) {
+        val (Seq(key), rest) = extras.value.splitAt(1)
+        Properties.load.set(key, rest.mkString(" ")).save()
+      }
+    case RemoveProp =>
+      extras.value.foldLeft(Properties.load)(_.remove(_)).save()
+    case ListProp =>
+      import scala.io.Source.{fromFile => open}
+      import util.control.Exception.allCatch
+      allCatch.opt(open(Properties.file).getLines)
+        .map(_.foreach(println))
+        .getOrElse(println("No properties"))
+    case Record =>
+      extras.value.headOption
+        .map(debug("Press [ENTER] to kill recording"))
+        .map(new capture.control.Record(_) with PostOperation)
+        .map { r => r.start(); Console.readLine; r.stop() }
+        .orElse(throw new ArgotUsageException("Supply a destination directory"))
+    case _ =>
+      handleWeb()
   }
 
   def handleWeb() {
     println("[CONFIG] Preparing server")
 
-    val listen = port.value.getOrElse(8080)
-    val address = bind.value.getOrElse("0.0.0.0")
-
-    val master = password.value.map { pass =>
-      println("[CONFIG] Authed controller")
-      ValidUser(user.value.getOrElse(""), pass)
-    }
-
-    val viewer = participant.value.map { pass =>
-      println("[CONFIG] Authed viewer participants")
-      ViewingUser(master, pass)
-    }
-
-    val service = jpegCamera.value.map { _ =>
-      println("[CONFIG] Setting framerate")
-      ImageStream(1000L / frameRate.value.getOrElse(10L))
-    }
-
-    val secret = PrivateKey.retrieve.getOrElse(PrivateKey.generate)
-
-    val vision = authed(viewer, service.getOrElse(Vision))
-
-    val connect = noConnect.value.map { _ =>
-      println("[CONFIG] Without control scripts")
-      List[ChannelHandler]()
-    } getOrElse (
-      List(authed(master, Connect(secret)))
+    val rvc = Rvc(
+      port = port.value.getOrElse(8080),
+      address = bind.value.getOrElse("0.0.0.0"),
+      user = user.value,
+      password = password.value.map(debug("Authed controller")),
+      viewer = participant.value.map(debug("Authed viewer participants")),
+      jpeg = jpegCamera.value.map(debug("Setting framerate")).isDefined,
+      framerate = frameRate.value.getOrElse(10L),
+      noConnect = noConnect.value.map(debug("Without control scripts")).isDefined,
+      secured = secured.value.isDefined,
+      keyStoreInfo = keyStoreInfo.value
     )
 
-    // Always have RobotTalk and Vision
-    val handlers = List(RobotTalk(secret), vision) ++ connect
-
-    def buildServer() {
-      // Https server requires extra system variables
-      val s: unfiltered.util.RunnableServer = secured.value.map { _ =>
-        keyStoreInfo.value
-          .orElse(Some(Properties.file))
-          .map(propertyChecks)
-          .map(readSslProperties)
-
-        handlers.foldLeft(Https(listen, address))(_.handler(_))
-      } getOrElse {
-        handlers.foldLeft(Http(listen, address))(_.handler(_))
+    rvc.server.run(_ => {
+      rvc.service.map { p =>
+        println("[CONFIG] Using jpeg stream")
+        p.start()
       }
-
-      s.run(_ => {
-        service.map { p =>
-          println("[CONFIG] Using jpeg stream")
-          p.start()
-        }
-        println("[START] Embedded server at %s:%d" format(address, listen))
-      }, _ => {
-        service.map(_.stop())
-      })
-    }
-
-    buildServer()
+      println("[START] Embedded server at %s:%d" format(rvc.address, rvc.port))
+    }, _ => {
+      rvc.service.map(_.stop())
+    })
   }
 
   def main(args: Array[String]) {
     try {
       parser.parse(args)
 
-      handleMode()
+      action.value.map(handleMode)
     } catch {
       case e: ArgotUsageException => println(e.message)
+      case e: Exception => println(e.getMessage)
     }
   }
 }
@@ -247,7 +152,7 @@ class Main extends xsbti.AppMain {
   case class Exit(code: Int) extends xsbti.Exit
 
   def run(configuration: xsbti.AppConfiguration) = {
-    Main.main(configuration.arguments)
+    RvcApp.main(configuration.arguments)
     Exit(0)
   }
 }
