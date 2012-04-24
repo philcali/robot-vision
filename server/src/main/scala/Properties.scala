@@ -37,6 +37,9 @@ class Properties(wrapped: JProps) {
     this
   }
 
+  def list: Map[String, String] =
+    wrapped.entrySet.map(s => (s.getKey.toString, s.getValue.toString)).toMap
+
   def load(old: JProps) = {
     val props = properties
     old.entrySet.foreach { s =>
@@ -50,12 +53,12 @@ class Properties(wrapped: JProps) {
     this
   }
 
-  def save() {
+  def save(f: File = Properties.file) {
     if (!Properties.folder.exists) {
       Properties.folder.mkdirs()
     }
 
-    val fis = new FileOutputStream(Properties.file)  
+    val fis = new FileOutputStream(f)
     wrapped.store(fis, "") 
     fis.close()
   }
