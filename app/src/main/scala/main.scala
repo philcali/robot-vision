@@ -27,11 +27,11 @@ object RvcApp {
   )
 
   val port = parser.option[Int](
-    List("i", "inet-port"), "8080", "internet port"
+    List("i", "inet-port"), "8080", "Web server internet port"
   )
 
   val bind = parser.option[String](
-    List("b", "bind-address"), "(0.0.0.0)", "bind address"
+    List("b", "bind-address"), "(0.0.0.0)", "Web server bind address"
   )
 
   val noConnect = parser.flag[Boolean](
@@ -41,7 +41,7 @@ object RvcApp {
 
   val participant = parser.option[String](
     List("v", "viewer-password"), "<viewer password>",
-    "separate password for the 'viewer' user (leave blank for open)"
+    "Separate password for the 'viewer' user (leave blank for open)"
   )
 
   val jpegCamera = parser.flag[Boolean](

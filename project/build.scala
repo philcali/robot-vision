@@ -160,5 +160,5 @@ object CaptureBuild extends Build {
         "org.scala-lang" % "scala-swing" % sv
       }
     )
-  ) dependsOn server
+  ) dependsOn app
 }

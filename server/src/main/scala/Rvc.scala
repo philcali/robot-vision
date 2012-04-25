@@ -48,9 +48,9 @@ case class Rvc(
   framerate: Long = 10L,
   keyStoreInfo: Option[File] = None
 ) {
-  val master = password.map(p => ValidUser(user.getOrElse(""), p))
-
   val service = if (jpeg) Some(ImageStream(1000L / framerate)) else None
+
+  val master = password.map(p => ValidUser(user.getOrElse(""), p))
 
   val secret = PrivateKey.retrieve.getOrElse(PrivateKey.generate)
 
@@ -74,7 +74,9 @@ case class Rvc(
     server.start()
     Right(true)
   } catch {
-    case e => Left(e)
+    case e =>
+      service.map(_.stop())
+      Left(e)
   }
 
   def stop() = {
