@@ -170,7 +170,17 @@ object KeyTranslate {
     case "13" => KeyEvent.VK_ENTER
     case "8" => KeyEvent.VK_BACK_SPACE
     case "9" => KeyEvent.VK_TAB
+    case "20"=> KeyEvent.VK_CAPS_LOCK
+    case "27" => KeyEvent.VK_ESCAPE
+    case "144" => KeyEvent.VK_NUM_LOCK
+    case "91" => KeyEvent.VK_META
+    case "45" => KeyEvent.VK_INSERT
+    case "46" => KeyEvent.VK_DELETE
+    case "35" => KeyEvent.VK_END
+    case "36" => KeyEvent.VK_HOME
     case "32" => KeyEvent.VK_SPACE
+    case "33" => KeyEvent.VK_PAGE_UP
+    case "34" => KeyEvent.VK_PAGE_DOWN
     case "16" => KeyEvent.VK_SHIFT
     case "17" => KeyEvent.VK_CONTROL
     case "18" => KeyEvent.VK_ALT
@@ -199,6 +209,18 @@ object KeyTranslate {
     case "222" => KeyEvent.VK_QUOTE
     case "188" => KeyEvent.VK_COMMA
     case "186" => KeyEvent.VK_SEMICOLON
+    case "112" => KeyEvent.VK_F1
+    case "113" => KeyEvent.VK_F2
+    case "114" => KeyEvent.VK_F3
+    case "115" => KeyEvent.VK_F4
+    case "116" => KeyEvent.VK_F5
+    case "117" => KeyEvent.VK_F6
+    case "118" => KeyEvent.VK_F7
+    case "119" => KeyEvent.VK_F8
+    case "120" => KeyEvent.VK_F9
+    case "121" => KeyEvent.VK_F10
+    case "122" => KeyEvent.VK_F11
+    case "123" => KeyEvent.VK_F12
     case _ => KeyEvent.CHAR_UNDEFINED
   }
 }
