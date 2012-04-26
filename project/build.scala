@@ -149,4 +149,16 @@ object CaptureBuild extends Build {
       ) }
     )
   ) dependsOn server
+
+  lazy val ui = Project(
+    "capture-ui",
+    file("ui"),
+    settings = General.settings ++ Seq(
+      scalacOptions ++= Seq("-deprecation", "-unchecked"),
+      mainClass in (Compile, run) := Some("capture.ui.RvcWindow"),
+      libraryDependencies <+= (scalaVersion) { sv =>
+        "org.scala-lang" % "scala-swing" % sv
+      }
+    )
+  ) dependsOn app
 }

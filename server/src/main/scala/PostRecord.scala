@@ -35,10 +35,11 @@ trait PostOperation extends LongRunning { self: Record =>
 
     val props = Properties.load
     val dest = props.get("record.dest").getOrElse("""\.""")
-    val delete = props.get("record.cleanup").filter(_.trim == "on")
+    val delete = props.get("record.cleanup").filter(_.trim == "true")
 
     try {
       props.get("record.command")
+        .filter(!_.isEmpty)
         .map(_.replaceAll("""\{location\}""", location.getAbsolutePath))
         .map(_.replaceAll("""\{filename\}""", location.getName))
         .map(_.replaceAll("""\{dest\}""", dest))
