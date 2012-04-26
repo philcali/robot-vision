@@ -155,7 +155,7 @@ object CaptureBuild extends Build {
     file("ui"),
     settings = General.settings ++ Seq(
       scalacOptions ++= Seq("-deprecation", "-unchecked"),
-      mainClass in (Compile, run) := Some("capture.ui.RvcConfigure"),
+      mainClass in (Compile, run) := Some("capture.ui.RvcWindow"),
       libraryDependencies <+= (scalaVersion) { sv =>
         "org.scala-lang" % "scala-swing" % sv
       }
