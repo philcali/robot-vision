@@ -143,12 +143,12 @@ object RvcApp {
       action.value.map(handleMode)
     } catch {
       case e: ArgotUsageException => println(e.message)
-      case e: Exception => println(e.getMessage)
+      case e: Exception => println("[ERROR]: %s" format e.getMessage)
     }
   }
 }
 
-class Main extends xsbti.AppMain {
+class RvcApp extends xsbti.AppMain {
   case class Exit(code: Int) extends xsbti.Exit
 
   def run(configuration: xsbti.AppConfiguration) = {
