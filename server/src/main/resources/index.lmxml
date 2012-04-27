@@ -39,11 +39,33 @@ html
               li 
                 a @href="/snapshot.jpg" @target="_blank"
                   img @src="/img/camera.png" @title="Snapshot"
+              enable-control
+                enable-control-true
+                  li
+                    a @data-toggle="modal" @href="#controls-modal"
+                      img @src="/img/display.png" @title="Display Settings"
     >#buffer .viewport
       img #desktop @src="/image/desktop_1.0x1.0_0.2_p.jpg"
     canvas #control @width="{width}" @height="{height}" {
       style: "z-index: 1; position: absolute; top: 40px; left: 0px;"
     }
+    >#controls-modal .modal .hide
+      >.modal-header
+        a.close @data-dismiss="modal" "x"
+        h3 "Display Settings"
+      >.modal-body
+        table
+          tr
+            td p "Quality"
+            td input.quality @type="range" @min="0.1" @max="1.0" @step="0.1" @value="0.2"
+          tr
+            td p "Size"
+            td input.size @type="range" @min="0.5" @max="1.0" @step="0.05" @value="1.0"
+          tr
+            td "Render Pointer "
+            td input.pointer @type="checkbox" @checked
+      >.modal-footer
+        a#controls-send .btn .btn-primary "Adjust display"
     >#clipboard-modal .modal .hide
       >.modal-header
         a.close @data-dismiss="modal" "x"
