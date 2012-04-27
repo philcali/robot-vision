@@ -14,14 +14,18 @@ case class Attachment(filename: String) extends Responder[Any] {
 }
 
 trait Interface extends DefaultPlan with Lmxml {
-  import lmxml.transforms.Empty
+  import lmxml.transforms.{ Empty, If }
 
   val pattern = new java.text.SimpleDateFormat("MM-dd-yy KK:mm:ss a")
 
   val validFiles =
     List("lib/jquery.js", "lib/desktop.js", "interface.js", "lib/viewport.js")
 
-  def data = Seq("connect-check" -> Empty)
+  def data = Seq(
+    "connect-check" -> Empty, "enable-control" -> If (enableControl)(Nil)
+  )
+
+  def enableControl: Boolean
 
   def preload: async.Plan.Intent
 

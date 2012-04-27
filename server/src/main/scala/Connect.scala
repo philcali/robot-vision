@@ -7,12 +7,13 @@ import unfiltered.response._
 import unfiltered.netty._
 
 case class Connect(secret: String) extends DefaultPlan with Lmxml {
-  import lmxml.transforms.{ If, Value }
+  import lmxml.transforms.{ Empty, If, Value }
 
   val validFiles = List("lib/connect.js", "lib/control.js", "web-connect.js")
 
   def data = Seq(
     "connect-check" -> If (true)(Nil),
+    "enable-control" -> Empty,
     "robot-key" -> Value(secret)
   )
 

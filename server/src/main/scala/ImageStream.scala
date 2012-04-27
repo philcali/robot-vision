@@ -47,10 +47,16 @@ case class ImageStream(delay: Long) extends Interface with ForeverRunning {
 
   val listeners = new DefaultChannelGroup("Image Streams")
 
+  def enableControl = false
+
+  override def responder = super.responder orElse {
+    case img: ImageProps => settings = img
+  }
+
   def preload = {
     // Imagine this file will actually be different
     // For now we'll just blank it out
-    case req @ Path("/interface.js") => req.respond(interface)
+    case req @ Path(Seg("interface.js" :: Nil)) => req.respond(interface)
     case req @ Path(Seg("image" :: DesktopImage(x, y, q, p) :: Nil)) =>
       // TODO: What about the controller changing service settings?
       val initial = req.underlying.defaultResponse(MixedReplace)

@@ -24,15 +24,19 @@ object Rvc {
 
   def readSslProperties(file: File) {
     println("[CONFIG] setting ssl props from %s" format file)
-    val p = Properties.fromFile(file).load(System.getProperties)
+    val p = Properties.fromFile(file)
 
     val check = (name: String) =>
       if (p.get(name).isEmpty)
-        throw new RuntimeException("[ERROR]: %s undefined" format name)
+        throw new RuntimeException("Property '%s' is undefined" format name)
+      else
+        (name, p.get(name).get)
 
     Seq("netty.ssl.keyStore", "netty.ssl.keyStorePassword").map(check)
 
-    System.setProperties(p.properties)
+    p.list.filter(_._1.startsWith("netty.ssl")).foreach {
+      case (k, v) => System.setProperty(k, v)
+    }
   }
 }
 
@@ -54,7 +58,7 @@ case class Rvc(
 
   val secret = PrivateKey.retrieve.getOrElse(PrivateKey.generate)
 
-  val handlers = List(RobotTalk(secret),
+  val handlers = List(RobotTalk(secret, service),
     Rvc.authed(viewer.map(ViewingUser(master, _)), service.getOrElse(Vision))
   ) ++ (if (!noConnect) List(Rvc.authed(master, Connect(secret))) else Nil)
 
@@ -64,9 +68,9 @@ case class Rvc(
       .map(Rvc.propertyChecks)
       .map(Rvc.readSslProperties)
 
-    handlers.foldLeft(Https(port, address))(_.handler(_))
+    (Https(port, address) /: handlers) (_.handler(_))
   } else {
-    handlers.foldLeft(Http(port, address))(_.handler(_))
+    (Http(port, address) /: handlers) (_.handler(_))
   }
 
   def start() = try {
@@ -76,6 +80,8 @@ case class Rvc(
   } catch {
     case e =>
       service.map(_.stop())
+      // Explicit call to release resources on exception
+      server.destroy()
       Left(e)
   }
 

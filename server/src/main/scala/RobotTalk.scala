@@ -27,8 +27,10 @@ object RobotAuth extends EventParsing("auth")
 object RobotRecord extends EventParsing("record")
 object ClipboardRetrieve extends EventParsing("clipretrieve")
 object ClipboardSet extends EventParsing("clipset")
+object ImageControl extends EventParsing("image")
 
-case class RobotTalk(secret: String) extends Plan with CloseOnException {
+case class RobotTalk(secret: String, service: Option[ImageStream])
+  extends Plan with CloseOnException {
   @volatile private var controller: Option[java.lang.Integer] = None
 
   // One per controller
@@ -89,6 +91,9 @@ case class RobotTalk(secret: String) extends Plan with CloseOnException {
         case _ if recorder.isRunning => s.send("record|started")
         case _ => s.send("record|stopped")
       }
+      case ImageControl(x, y, q, p) =>
+        service.map(_ ! ImageProps(x.toDouble, y.toDouble, q.toFloat, p.toBoolean))
+        s.send("image|success")
       case ClipboardRetrieve(value) =>
         s.send("clipboard|get|%s" format Clipboard.retrieve.getOrElse(""))
       case msg if msg.startsWith(ClipboardSet.ident) =>

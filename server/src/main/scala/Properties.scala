@@ -19,7 +19,9 @@ object Properties {
 
   def fromFile(local: File) = {
     val props = new JProps()
-    allCatch opt(props.load(new FileInputStream(local)))
+    val ins = new FileInputStream(local)
+    allCatch opt(props.load(ins))
+    ins.close()
     new Properties(props)
   }
 }

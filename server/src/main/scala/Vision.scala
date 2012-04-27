@@ -8,8 +8,9 @@ import unfiltered.response._
 
 import unfiltered.netty.async
 
-
 object Vision extends Interface {
+  def enableControl = true
+
   def preload = {
     case req @ Path(Seg("image" :: DesktopImage(x, y, q, p) :: Nil)) =>
       val screenshot = if (p) Robot.screenshot.withPointer
