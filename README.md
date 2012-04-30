@@ -205,15 +205,13 @@ primary action, but below is the output by running `rvc actions`:
 
 ## Known Issues
 
-way to fix this at the moment, is to re-run `rvc` with the `c` or `clean-keys` action.
 - Screen capturing can be really slow (JVM screencap performance is lousy)
-- No way to control the image quality or scale from the client (TODO item)
 
 ## TODO's
 
 - Popup notification upon successful login.
-- Popout interface for dynamic controls (mainly controlling scales and quality)
 - interface for uploading and downloading files from browser
+- Relay communication server
 
 ## License
 
