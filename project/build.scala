@@ -1,6 +1,12 @@
 import sbt._
 import Keys._
 
+import sbtassembly.Plugin.{
+  AssemblyKeys,
+  MergeStrategy,
+  assemblySettings
+}
+
 import less.Plugin.{
   LessKeys,
   lessSettings
@@ -13,13 +19,22 @@ import sbtjslint.Plugin.{
 }
 
 object General {
+  val buildVersion = "0.0.2"
+
+  val buildShellPrompt = (state: State) => {
+    val projectId = Project.extract (state).currentProject.id
+    val shortened = projectId.split("-").map(_.take(1)).mkString("-")
+    "%#3s %s> " format (shortened, buildVersion)
+  }
+
   val crossVersions = Seq(
     "2.8.1", "2.8.2", "2.9.0", "2.9.0-1", "2.9.1"
   )
 
   val settings: Seq[Setting[_]] = Defaults.defaultSettings ++ Seq(
     scalaVersion := "2.9.1",
-    version := "0.0.2",
+    version := buildVersion,
+    shellPrompt := buildShellPrompt,
     organization := "com.github.philcali",
     publishTo <<= version { v =>
       val nexus = "https://oss.sonatype.org/"
@@ -116,6 +131,24 @@ object Lint {
   ))
 }
 
+object Executable {
+  import AssemblyKeys._
+
+  val settings: Seq[Setting[_]] = assemblySettings ++ Seq(
+    jarName in assembly <<= (version)("rvc-%s.jar".format(_: String)),
+    target in assembly <<= (baseDirectory)(_.getParentFile),
+    excludedFiles in assembly := { (bases: Seq[File]) =>
+      bases flatMap { base =>
+        (base / "META-INF" * "*").get collect {
+          case f if f.name == "NOTICE.txt" => f
+          case f if f.name.toLowerCase == "license.txt" => f
+          case f if f.name.toLowerCase == "manifest.mf" => f
+        }
+      }
+    }
+  )
+}
+
 object CaptureBuild extends Build {
   lazy val root = Project(
     "capture",
@@ -153,7 +186,7 @@ object CaptureBuild extends Build {
   lazy val ui = Project(
     "capture-ui",
     file("ui"),
-    settings = General.settings ++ Seq(
+    settings = General.settings ++ Executable.settings ++ Seq(
       scalacOptions ++= Seq("-deprecation", "-unchecked"),
       mainClass in (Compile, run) := Some("capture.ui.RvcWindow"),
       libraryDependencies <+= (scalaVersion) { sv =>

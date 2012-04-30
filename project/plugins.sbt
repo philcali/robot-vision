@@ -1,3 +1,5 @@
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.8.0")
+
 addSbtPlugin("me.lessis" % "less-sbt" % "0.1.9")
 
 addSbtPlugin("com.github.philcali" % "sbt-jslint" % "0.1.1")
