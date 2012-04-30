@@ -7,7 +7,7 @@ same way one would through applications like RDP or VNC.
 
 - [java][java] >= 1.6
 - CLI users: n8han's [cs][cs] (follow instructions on README)
-- Other users: [rvc app][app]
+- Other users: [rvc app][app] (double-click executable)
 
 [cs]: https://github.com/n8han/conscript#readme
 [java]: http://java.com/en/download/index.jsp
