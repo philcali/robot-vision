@@ -9,7 +9,9 @@ import java.awt.Color
 object ChromePanel extends BoxPanel(Orientation.Horizontal) {
   border = Swing.TitledBorder(Swing.LineBorder(Color.BLACK), "Chrome Key")
 
-  val keyLabel = new Label(server.PrivateKey.retrieve.getOrElse(""))
+  val keyLabel = new TextField(server.PrivateKey.retrieve.getOrElse("")) {
+    editable = false
+  }
   val keyButton = new Button("Generate") {
     maximumSize = new java.awt.Dimension(150, 40)
   }
