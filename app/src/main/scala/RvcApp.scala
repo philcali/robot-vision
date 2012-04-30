@@ -148,7 +148,7 @@ object RvcApp {
   }
 }
 
-class RvcApp extends xsbti.AppMain {
+class Main extends xsbti.AppMain {
   case class Exit(code: Int) extends xsbti.Exit
 
   def run(configuration: xsbti.AppConfiguration) = {
