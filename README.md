@@ -6,34 +6,46 @@ same way one would through applications like RDP or VNC.
 ## Requirements
 
 - [java][java] >= 1.6
-- n8han's [cs][cs] (follow instructions on README)
+- CLI users: n8han's [cs][cs] (follow instructions on README)
+- Other users: [rvc app][app]
 
-[java]: http://java.com/en/download/index.jsp
 [cs]: https://github.com/n8han/conscript#readme
+[java]: http://java.com/en/download/index.jsp
+[app]: http://philcali.github.com/robot-vision/rvc.jar
 
-## Installation
+## CLI Installation
+
+These instructions are for those who would rather install this app for primary
+launching from the command-line.
 
 ```
 > cs philcali/robot-vision
 ```
 
-Test it out with:
+Launch the app with:
 
 ```
 > rvc -j web
 ```
 
-Direct your browser to [http://localhost:8080/robot-vision.html][locally]
+## Mirrors
+
+Whether you downloaded the thick swing app or the cli version, you can test it
+out by directing your browser: [http://localhost:8080/robot-vision.html][locally].
 
 [locally]: http://localhost:8080/robot-vision.html
+
+If the app is running properly, you will be greeted with the endless mirrors of
+your desktop! Of course, now it's time for you to connect to the host machine
+_remotely_, which is the point of this application.
 
 ## Controlling and Viewing
 
 RVC was made with the idea of sharing the desktop. Only one person can control
-the desktop, while others watch.
+the machine, while others watch (or participate).
 
-- `desktop.html` to control the desktop
-- `robot-vision.html` read only view of the desktop
+- `desktop.html` to control the machine
+- `robot-vision.html` read only view of the machine
 
 If you want to wrap the control scripts around basic auth, then pass in
 a username and password via `rvc -u user -p password web`.
@@ -62,7 +74,7 @@ and inject the needed code using a Chrome Extension.
 
 The extension is available at [robot-chrome][vision-ext].
 
-[vision-ext]: https://github.com/philcali/robot-chrome
+[vision-ext]: https://chrome.google.com/webstore/detail/ieabafligicoomhcodhiolhlmljhmifi?utm_source=chrome-ntp-icon
 
 __Note__: Chrome extension integration requires that the `gen` action is run at
 least once to generate the 32 character random string for authentication:
@@ -91,8 +103,9 @@ by a third party.
 
 ## Screen recording
 
-RVC allows simplistic screen recording by passing in the following arguments
-in the commandline:
+RVC allows simplistic screen recording by taking a series of snapshots that one
+can later build (automatically or not) into a screencast. ClI users can do so by
+ passing in the following arguments:
 
 ```
 > rvc record /temp/path/to/jpgs
@@ -101,7 +114,7 @@ in the commandline:
 __Note__: in `web` mode, the controller will have an option to initiate and stop
 a recording remotely. Currently, remote recordings are stored in:
 ```
-{USER-HOME}/.robot_vision/recording_{timestamp}
+{USER-HOME}/recording_{timestamp}
 ```
 
 This program does not build the movie from the images. Instead, you can use
@@ -132,7 +145,7 @@ for screen capture image manipulation and remote control.
 
 Feel free to use it in your projects.
 
-`libraryDependencies += "com.github.philcali" %% "capture-control" % "0.0.1"`
+`libraryDependencies += "com.github.philcali" %% "capture-control" % "0.0.2"`
 
 ## Client Library
 
@@ -151,14 +164,14 @@ Usage: rvc [OPTIONS] action extras
 OPTIONS
 
 -b (0.0.0.0)
---bind-address (0.0.0.0)               bind address
+--bind-address (0.0.0.0)               Web server bind address
 
 -f framerate 10 (per second)
 --framerate framerate 10 (per second)  If in jpeg camera mode, push image data
                                        at specified framerate
 
 -i 8080
---inet-port 8080                       internet port
+--inet-port 8080                       Web server internet port
 
 -j
 --jpeg-camera                          Serves image data via jpeg camera
@@ -183,7 +196,7 @@ OPTIONS
 --user <none>                          user to auth
 
 -v <viewer password>
---viewer-password <viewer password>    separate password for the 'viewer' user
+--viewer-password <viewer password>    Separate password for the 'viewer' user
                                        (leave blank for open)
 ```
 
