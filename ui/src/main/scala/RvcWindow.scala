@@ -16,6 +16,15 @@ case class PCheck(pname: String, props: Properties) extends CheckBox {
 }
 
 object RvcWindow extends SimpleSwingApplication {
+  // First-timers
+  if (!Properties.folder.exists) {
+    Properties.folder.mkdir
+  }
+
+  if (!Properties.file.exists) {
+    Properties.file.createNewFile
+  }
+
   val appTitle = "Robot Vision Control"
 
   def top = new Frame { inner =>
