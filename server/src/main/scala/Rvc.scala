@@ -29,8 +29,6 @@ object Rvc {
     val check = (name: String) =>
       if (p.get(name).isEmpty)
         throw new RuntimeException("Property '%s' is undefined" format name)
-      else
-        (name, p.get(name).get)
 
     Seq("netty.ssl.keyStore", "netty.ssl.keyStorePassword").map(check)
 

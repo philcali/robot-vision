@@ -15,7 +15,14 @@ object Properties {
   val folder = new File(System.getProperty("user.home"), ".robot-vision")
   val file = new File(folder, "vision.properties")
 
-  def load(): Properties = fromFile(file) 
+  def load(): Properties = {
+    if (!folder.exists) {
+      folder.mkdir
+      file.createNewFile
+    }
+
+    fromFile(file)
+  }
 
   def fromFile(local: File) = {
     val props = new JProps()
