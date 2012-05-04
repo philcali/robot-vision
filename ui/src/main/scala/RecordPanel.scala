@@ -45,7 +45,7 @@ object RecordPanel extends GridPanel(3, 2) {
       stop.enabled = true
     case ButtonClicked(`stop`) =>
       recorder.stop()
-      RvcTray.message("Recording", "Recording has stopped", TrayMessage.None)
+      RvcTray.message("Recording", "Recording has stopped", TrayMessage.Info)
       stop.enabled = false
       start.enabled = true
   }

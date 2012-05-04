@@ -47,6 +47,8 @@ object RvcWindow extends SimpleSwingApplication {
       def mouseReleased(e: MouseEvent) {}
     }))
 
+    resizable = false
+
     title = appTitle
 
     iconImage = ImageIO.read(getClass.getResourceAsStream("/icon.png"))

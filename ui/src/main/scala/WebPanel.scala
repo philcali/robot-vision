@@ -82,8 +82,8 @@ object WebPanel extends GridPanel(10, 2) {
       props.set(property.pname, property.selected.toString).save(h)
     case ButtonClicked(`launch`) =>
       props.save(h)
-      allCatch.opt(
-        server.Rvc(
+      try {
+        rvc = server.Rvc(
           port = port.text.toInt,
           address = bind.text,
           secured = https.selected,
@@ -92,21 +92,27 @@ object WebPanel extends GridPanel(10, 2) {
           password = if (password.text.isEmpty) None else Some(password.text),
           viewer = if (viewer.text.isEmpty) None else Some(viewer.text),
           framerate = framerate.text.toLong,
-          jpeg = jpeg.selected
-      )).map(rvc = _).getOrElse(
-        RvcTray.message("Web", "Bad Settings - previous settings",TrayMessage.Error)
-      )
-      rvc.start().fold ({ e =>
-        RvcTray.message("Web", e.getMessage(), TrayMessage.Error)
-      }, { _ =>
-        launch.enabled = false
-        RvcTray.message("Web", "RVC is running", TrayMessage.None)
-        stop.enabled = true
-      })
+          jpeg = jpeg.selected)
+
+        val failure = (e: java.lang.Throwable) =>
+          RvcTray.message("Web", e.getMessage(), TrayMessage.Error)
+
+        val success = (b: Boolean) => {
+          launch.enabled = false
+          RvcTray.message("Web", "RVC is running", TrayMessage.Info)
+          stop.enabled = true
+        }
+
+        rvc.start().fold(failure, success)
+      } catch {
+        case e => RvcTray.message(
+          "Web", "Bad settings: %s" format e.getMessage, TrayMessage.Error
+        )
+      }
     case ButtonClicked(`stop`) =>
       rvc.stop()
       stop.enabled = false
-      RvcTray.message("Web", "RVC has stopped", TrayMessage.None)
+      RvcTray.message("Web", "RVC has stopped", TrayMessage.Info)
       launch.enabled = true
   }
 }
