@@ -1,0 +1,23 @@
+- Better recording handling [#1][1]
+- Removed Pesky timeout errors when in jpeg mode [#2][2]
+- Page title is now the machine hostname [#3][3]
+- Added clipboard setting and retrieval of host machine [231200][231200]
+- Added popout interface for quality and scaling remote image [d09140][d09140]
+- Added Swing UI [4b3ae9][4b3ae9]
+- More js keycodes handled [86355b][86355b]
+
+## Upgrading
+
+CLI users can upgrade using `cs` by running the following command:
+
+```
+cs philcali/robot-vision
+```
+
+[1]: https://github.com/philcali/robot-vision/issues/1
+[2]: https://github.com/philcali/robot-vision/issues/2
+[3]: https://github.com/philcali/robot-vision/issues/3
+[231200]: https://github.com/philcali/robot-vision/commit/2312007c93b5f51ee1a9a1ce547e6efb8b545828
+[86355b]: https://github.com/philcali/robot-vision/commit/86355b3f35b2d3e60319199acea732f2e998b27d
+[d09140]: https://github.com/philcali/robot-vision/commit/d091407b2d78e9bb6b651a6f67036f44664d004a
+[4b3ae9]: https://github.com/philcali/robot-vision/commit/4b3ae9e7e43a535fe6282af6498c0fcfc347ac65
