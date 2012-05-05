@@ -83,6 +83,9 @@ least once to generate the 32 character random string for authentication:
 rvc gen
 ```
 
+GUI users can simply copy the Chrome key or generate another by clicking on
+_Generate_.
+
 ## SSL Properties
 
 RVC supports https with the `-s` flag. It is important to note that https
@@ -98,8 +101,9 @@ Supply the properties with `rvc set prop.key prop.value`.
 > rvc set netty.ssl.keyStorePassword secret
 ```
 
-__Note__: Chrome will obviously complain about trust issues until it is trusted
-by a third party. 
+Read more on the [wiki][ssl].
+
+[ssl]: https://github.com/philcali/robot-vision/wiki/Setup-SSL
 
 ## Screen recording
 
@@ -122,6 +126,8 @@ your favorite program to do that.
 
 RVC looks at two properties for record:
 
+- `record.cleanup` - If true and `record.command` is set, then it will clear out
+  all the recorded images
 - `record.command` - This is executed after the recording is finished and
 - `record.dest` - optionally pass in the destination location
 
@@ -219,12 +225,6 @@ primary action, but below is the output by running `rvc actions`:
 ## Known Issues
 
 - Screen capturing can be really slow (JVM screencap performance is lousy)
-
-## TODO's
-
-- Popup notification upon successful login.
-- interface for uploading and downloading files from browser
-- Relay communication server
 
 ## License
 
