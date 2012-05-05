@@ -32,13 +32,13 @@ object RecordPanel extends GridPanel(3, 2) {
     enabled = false
   }
 
-  listenTo(start, stop)
+  listenTo(cleanup, command, start, stop)
 
   reactions += {
-    case ButtonClicked(`cleanup`) =>
-      props.set(cleanup.pname, cleanup.selected).save()
-    case EditDone(`command`) =>
-      props.set(command.pname, command.text).save()
+    case ButtonClicked(clicker: PCheck) =>
+      props.set(clicker.pname, clicker.selected).save()
+    case EditDone(text: PText) =>
+      props.set(text.pname, text.text).save()
     case ButtonClicked(`start`) =>
       allCatch opt(recorder.restart()) getOrElse(recorder.start())
       start.enabled = false
