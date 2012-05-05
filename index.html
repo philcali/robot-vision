@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Robot Vision Control : Embedded server to allow remote control over a host machine." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Robot Vision Control</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/philcali/robot-vision">View on GitHub</a>
+
+          <h1 id="project_title">Robot Vision Control</h1>
+          <h2 id="project_tagline">Embedded server to allow remote control over a host machine.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/philcali/robot-vision/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/philcali/robot-vision/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>Robot Vision Control</h1>
+
+<p>Robot Vision Control (RVC) allows Chrome browsers to control a host machine the
+same way one would through applications like RDP or VNC.</p>
+
+<h2>Requirements</h2>
+
+<ul>
+<li>
+<a href="http://java.com/en/download/index.jsp">java</a> &gt;= 1.6</li>
+<li>CLI users: n8han's <a href="https://github.com/n8han/conscript#readme">cs</a> (follow instructions on README)</li>
+<li>GUI users: <a href="http://philcali.github.com/robot-vision/rvc.jar">rvc app</a> (double-click executable)</li>
+</ul><h2>CLI Installation</h2>
+
+<p>These instructions are for those who would rather install this app for primary
+launching from the command-line.</p>
+
+<pre><code>&gt; cs philcali/robot-vision
+</code></pre>
+
+<p>Launch the app with:</p>
+
+<pre><code>&gt; rvc -j web
+</code></pre>
+
+<h2>Mirrors</h2>
+
+<p>Whether you downloaded the thick swing app or the cli version, you can test it
+out by directing your browser: <a href="http://localhost:8080/robot-vision.html">http://localhost:8080/robot-vision.html</a>.</p>
+
+<p>If the app is running properly, you will be greeted with the endless mirrors of
+your desktop! Of course, now it's time for you to connect to the host machine
+<em>remotely</em>, which is the point of this application.</p>
+
+<h2>Controlling and Viewing</h2>
+
+<p>RVC was made with the idea of sharing the desktop. Only one person can control
+the machine, while others watch (or participate).</p>
+
+<ul>
+<li>
+<code>desktop.html</code> to control the machine</li>
+<li>
+<code>robot-vision.html</code> read only view of the machine</li>
+</ul><p>If you want to wrap the control scripts around basic auth, then pass in
+a username and password via <code>rvc -u user -p password web</code>.</p>
+
+<p>If you want to wrap the viewers in basic auth, use <code>rvc -v password web</code>. The
+username for <code>robot-vision.html</code> authentication will always be <code>viewer</code>.</p>
+
+<p>Keep in mind, this is plain text auth over http. Read below about using ssl
+secured auth over https.</p>
+
+<h2>Streaming vs Reloading</h2>
+
+<p>RVC allows for two specific forms of <em>reloading</em> the desktop image. The first
+way is a client side loop reloading the image. The second is the <em>jpeg</em> camera
+type streaming to the browser, where the server pushes images to clients.</p>
+
+<p>The default behavior is to have javascript reload the scene, but testing showed
+that jpeg camera streams proved to be more fluid. Don't use this method if
+you know clients browsers don't support it.</p>
+
+<h2>Using a Chrome Extension</h2>
+
+<p>Control communication must be allowed via passing a <em>key</em> to an open web socket
+connection. This means it's possible to <strong>not</strong> serve the control code (with <code>-n</code>),
+and inject the needed code using a Chrome Extension.</p>
+
+<p>The extension is available at <a href="https://chrome.google.com/webstore/detail/ieabafligicoomhcodhiolhlmljhmifi?utm_source=chrome-ntp-icon">robot-chrome</a>.</p>
+
+<p><strong>Note</strong>: Chrome extension integration requires that the <code>gen</code> action is run at
+least once to generate the 32 character random string for authentication:</p>
+
+<pre><code>rvc gen
+</code></pre>
+
+<p>GUI users can simply copy the Chrome key or generate another by clicking on
+<em>Generate</em>.</p>
+
+<h2>SSL Properties</h2>
+
+<p>RVC supports https with the <code>-s</code> flag. It is important to note that https
+requests will <strong>always</strong> fail until (at least) two system properties are set:</p>
+
+<ol>
+<li><code>netty.ssl.keyStore</code></li>
+<li><code>netty.ssl.keyStorePassword</code></li>
+</ol><p>Supply the properties with <code>rvc set prop.key prop.value</code>.</p>
+
+<pre><code>&gt; rvc set netty.ssl.keyStore /path/to/cert.jks
+&gt; rvc set netty.ssl.keyStorePassword secret
+</code></pre>
+
+<p>Read more on the <a href="https://github.com/philcali/robot-vision/wiki/Setup-SSL">wiki</a>.</p>
+
+<h2>Screen recording</h2>
+
+<p>RVC allows simplistic screen recording by taking a series of snapshots that one
+can later build (automatically or not) into a screencast. ClI users can do so by
+ passing in the following arguments:</p>
+
+<pre><code>&gt; rvc record /temp/path/to/jpgs
+</code></pre>
+
+<p><strong>Note</strong>: in <code>web</code> mode, the controller will have an option to initiate and stop
+a recording remotely. Currently, remote recordings are stored in:</p>
+
+<pre><code>{USER-HOME}/recording_{timestamp}
+</code></pre>
+
+<p>This program does not build the movie from the images. Instead, you can use
+your favorite program to do that.</p>
+
+<p>RVC looks at two properties for record:</p>
+
+<ul>
+<li>
+<code>record.cleanup</code> - If true and <code>record.command</code> is set, then it will clear out
+all the recorded images</li>
+<li>
+<code>record.command</code> - This is executed after the recording is finished and</li>
+<li>
+<code>record.dest</code> - optionally pass in the destination location</li>
+</ul><p>RVC will replace three strings in the command:</p>
+
+<ul>
+<li>
+<code>{location}</code> - the location set by the recorder</li>
+<li>
+<code>{filename}</code> - the filename of the movie</li>
+<li>
+<code>{dest}</code> - the directory destination</li>
+</ul><p>In Linux, one might use ffmpeg to transform the series of jpeg's to a movie
+like so:</p>
+
+<pre><code>ffmpeg -r 7 -b 128k -i {location}/%07d.jpg {dest}/{filename}.mp4
+</code></pre>
+
+<h2>Control Library</h2>
+
+<p>The <code>capture-control</code> library is a wrapper around java utilities used in RVC
+for screen capture image manipulation and remote control.</p>
+
+<p>Feel free to use it in your projects.</p>
+
+<p><code>libraryDependencies += "com.github.philcali" %% "capture-control" % "0.0.2"</code></p>
+
+<h2>Client Library</h2>
+
+<p>The client interface is a submodule shared by this application and the Chrome
+extension.</p>
+
+<p>That code is found at <a href="https://github.com/philcali/robot-interface">robot-interface</a>.</p>
+
+<h2>RVC Options</h2>
+
+<pre><code>Usage: rvc [OPTIONS] action extras
+
+OPTIONS
+
+-b (0.0.0.0)
+--bind-address (0.0.0.0)               Web server bind address
+
+-f framerate 10 (per second)
+--framerate framerate 10 (per second)  If in jpeg camera mode, push image data
+                                       at specified framerate
+
+-i 8080
+--inet-port 8080                       Web server internet port
+
+-j
+--jpeg-camera                          Serves image data via jpeg camera
+                                       transport
+
+-k /path/to/ssl.properties
+--key-store /path/to/ssl.properties    To be used with --secured. This is the
+                                       properties file containing netty ssl
+                                       info.
+
+-n
+--no-connect                           don't serve up connection js (ideal if
+                                       using Chrome extension to connect)
+
+-p &lt;none&gt;
+--password &lt;none&gt;                      password to auth
+
+-s
+--secured                              https server (http)
+
+-u &lt;none&gt;
+--user &lt;none&gt;                          user to auth
+
+-v &lt;viewer password&gt;
+--viewer-password &lt;viewer password&gt;    Separate password for the 'viewer' user
+                                       (leave blank for open)
+</code></pre>
+
+<h2>Vision Actions</h2>
+
+<p>Actions are meant to be run once, and done. The remote control server is the
+primary action, but below is the output by running <code>rvc actions</code>:</p>
+
+<pre><code> run, web                       Launches embedded server
+ c, clean-keys                  Wipes stuck inputs
+ record                         Records actions only
+ gen, generate-key              Generates a Chrome extension connection key
+ set, add                       Sets a vision property
+ remove, rm                     Removes a vision property
+ list, ls                       Lists vision properties
+ actions, help                  Displays this list
+</code></pre>
+
+<h2>Known Issues</h2>
+
+<ul>
+<li>Screen capturing can be really slow (JVM screencap performance is lousy)</li>
+</ul><h2>License</h2>
+
+<p>The MIT.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Robot Vision Control maintained by <a href="https://github.com/philcali">philcali</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
