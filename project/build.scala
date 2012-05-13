@@ -19,7 +19,7 @@ import sbtjslint.Plugin.{
 }
 
 object General {
-  val buildVersion = "0.0.2"
+  val buildVersion = "0.0.3"
 
   val buildShellPrompt = (state: State) => {
     val projectId = Project.extract (state).currentProject.id
