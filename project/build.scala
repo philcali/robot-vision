@@ -74,7 +74,7 @@ object Server {
   val unfilteredVersion = SettingKey[String]("unfiltered-version")
 
   val settings: Seq[Setting[_]] = General.settings ++ Seq(
-    unfilteredVersion := "0.6.1",
+    unfilteredVersion := "0.6.2",
     crossScalaVersions := General.crossVersions,
     libraryDependencies <++= (unfilteredVersion) { uv => Seq(
       "com.github.philcali" %% "lmxml-html" % "0.1.1",
