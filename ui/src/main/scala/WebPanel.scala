@@ -35,7 +35,7 @@ object WebPanel extends GridPanel(10, 2) {
   object username extends PText("username", "", props) {
     tooltip = app.RvcApp.user.description
   }
-  object password extends PText("password", "", props) {
+  object password extends PPass("password", props) {
     tooltip = app.RvcApp.password.description
   }
   object bind extends PText("address", "0.0.0.0", props) {
@@ -44,7 +44,7 @@ object WebPanel extends GridPanel(10, 2) {
   object port extends PText("port", "8080", props) {
     tooltip = app.RvcApp.port.description
   }
-  object viewer extends PText("viewer", "", props) {
+  object viewer extends PPass("viewer", props) {
     tooltip = app.RvcApp.participant.description
   }
   object framerate extends PText("framerate", "10", props) {
@@ -76,6 +76,8 @@ object WebPanel extends GridPanel(10, 2) {
   )
 
   reactions += {
+    case EditDone(property: PPass) =>
+      props.set(property.pname, property.password.mkString).save(h)
     case EditDone(property: PText) =>
       props.set(property.pname, property.text).save(h)
     case ButtonClicked(property: PCheck) =>

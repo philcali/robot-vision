@@ -8,10 +8,18 @@ import scala.swing._
 import java.awt.event.{ MouseListener, MouseEvent }
 import javax.imageio.ImageIO
 
-case class PText(pname: String, default: String, props: Properties)
-  extends TextField(props.get(pname).getOrElse(default), 10)
+trait PropertyMapper {
+  val pname: String
+  val props: Properties
+}
 
-case class PCheck(pname: String, props: Properties) extends CheckBox {
+case class PText(pname: String, default: String, props: Properties)
+  extends TextField(props.get(pname).getOrElse(default), 10) with PropertyMapper
+
+case class PPass(pname: String, props: Properties)
+  extends PasswordField(props.get(pname).getOrElse(""), 10) with PropertyMapper
+
+case class PCheck(pname: String, props: Properties) extends CheckBox with PropertyMapper {
   selected = props.get(pname).filter(_ == "true").isDefined
 }
 
