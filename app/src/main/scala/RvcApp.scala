@@ -10,7 +10,7 @@ import server._
 object RvcApp {
   import ArgotConverters._
 
-  val preUsage = "Robot Vision Control: Version 0.1 Copyright(c) 2012, Philip M. Cali"
+  val preUsage = "Robot Vision Control: Version 0.0.3 Copyright(c) 2012, Philip M. Cali"
 
   val parser = new ArgotParser("rvc", preUsage=Some(preUsage))
 
