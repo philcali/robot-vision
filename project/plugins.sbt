@@ -1,4 +1,4 @@
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.8.0")
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.8.1")
 
 addSbtPlugin("me.lessis" % "less-sbt" % "0.1.9")
 

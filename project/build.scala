@@ -177,8 +177,8 @@ object CaptureBuild extends Build {
     settings = General.settings ++ Seq(
       scalacOptions ++= Seq("-deprecation", "-unchecked"),
       libraryDependencies <++= (sbtVersion) { sv => Seq(
-        "org.clapper" %% "argot" % "0.3.6",
-        "org.scala-tools.sbt" %% "launcher-interface" % sv % "provided"
+        "org.clapper" %% "argot" % "0.4.0",
+        "org.scala-sbt" %% "launcher-interface" % sv % "provided"
       ) }
     )
   ) dependsOn server
